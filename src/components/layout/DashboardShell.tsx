@@ -29,6 +29,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarProvider,
+  SidebarInset,
   SidebarSeparator,
   SidebarTrigger,
   SidebarRail,
@@ -90,7 +91,6 @@ function SidebarContentLayout({ children, phoneNumber, demoMode }: DashboardShel
               <p className="font-semibold text-sm">iVALT</p>
               <p className="text-xs text-sidebar-foreground/60">Developer Portal</p>
             </div>
-            <SidebarTrigger className="ml-auto" />
           </div>
         </SidebarHeader>
 
@@ -240,7 +240,7 @@ function SidebarContentLayout({ children, phoneNumber, demoMode }: DashboardShel
       </Sidebar>
 
       {/* Main content area */}
-      <div className="flex-1 flex flex-col min-h-screen bg-gray-100">
+      <SidebarInset>
         {/* Top bar */}
         <header className="flex items-center gap-4 px-6 py-4 bg-white border-b border-gray-200 shrink-0">
           <div className="flex items-center gap-2">
@@ -269,10 +269,10 @@ function SidebarContentLayout({ children, phoneNumber, demoMode }: DashboardShel
         </header>
 
         {/* Content */}
-        <main className="flex-1 overflow-y-auto p-6 lg:p-8">
+        <main className="flex-1 overflow-y-auto p-6 lg:p-8 bg-gray-100">
           {children}
         </main>
-      </div>
+      </SidebarInset>
     </>
   );
 }
