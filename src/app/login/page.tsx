@@ -3,7 +3,11 @@
 import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Smartphone, ShieldCheck, Loader2, ArrowRight, ChevronDown, FlaskConical, CheckCircle2, Fingerprint, Lock } from "lucide-react";
+import { Smartphone, ShieldCheck, Loader2, ArrowRight, ChevronDown, FlaskConical, CheckCircle2, Lock } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent } from "@/components/ui/card";
 
 const DEMO_MODE = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
 
@@ -121,271 +125,191 @@ export default function LoginPage() {
   }, [fullNumber, router]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center relative overflow-hidden" style={{ backgroundColor: "#09090b" }}>
-      {/* Animated gradient background */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-0 left-1/4 w-96 h-96 rounded-full blur-3xl" style={{ background: "radial-gradient(circle, rgba(19,72,220,0.15) 0%, transparent 70%)" }} />
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 rounded-full blur-3xl" style={{ background: "radial-gradient(circle, rgba(43,127,255,0.1) 0%, transparent 70%)" }} />
-        <div className="absolute inset-0" style={{ backgroundImage: "radial-gradient(circle at 1px 1px, rgba(255,255,255,0.03) 1px, transparent 0)", backgroundSize: "40px 40px" }} />
-      </div>
-
-      {/* Main card */}
-      <div className="relative w-full max-w-md mx-4">
-        {/* Card glow effect */}
-        <div className="absolute -inset-px rounded-2xl opacity-50" style={{ background: "linear-gradient(135deg, rgba(19,72,220,0.4) 0%, rgba(43,127,255,0.2) 50%, rgba(19,72,220,0.1) 100%)", filter: "blur(20px)" }} />
+    <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: "#f5f5f7" }}>
+      <div className="w-full max-w-sm">
         
-        <div className="relative rounded-2xl p-8 md:p-10" style={{ background: "linear-gradient(180deg, #18181b 0%, #09090b 100%)", border: "1px solid rgba(255,255,255,0.08)" }}>
-          {/* Logo */}
-          <div className="flex items-center gap-3 mb-10">
-            <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: "linear-gradient(135deg, #1348dc 0%, #1e5aee 100%)", boxShadow: "0 0 30px rgba(19,72,220,0.3)" }}>
-              <ShieldCheck className="w-7 h-7 text-white" />
-            </div>
-            <div>
-              <span className="text-white font-bold text-xl" style={{ fontFamily: "var(--font-plex-serif)", letterSpacing: "-0.02em" }}>iVALT</span>
-              {DEMO_MODE && (
-                <span className="ml-2 text-xs font-semibold px-2 py-0.5 rounded-md" style={{ backgroundColor: "rgba(142,197,255,0.15)", color: "#8ec5ff", letterSpacing: "0.05em" }}>
-                  DEMO
-                </span>
-              )}
-            </div>
+        {/* Logo */}
+        <div className="flex items-center justify-center gap-2 mb-8">
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: "#1d1d1f" }}>
+            <ShieldCheck className="w-5 h-5 text-white" />
           </div>
+          <span className="text-lg font-semibold" style={{ color: "#1d1d1f", letterSpacing: "-0.02em" }}>iVALT</span>
+          {DEMO_MODE && (
+            <span className="text-xs font-medium px-1.5 py-0.5 rounded" style={{ backgroundColor: "#e8e8ed", color: "#1d1d1f" }}>DEMO</span>
+          )}
+        </div>
 
-          {/* ── Step: Phone ──────────────────────────────────────────────── */}
-          {step === "phone" && (
-            <div className="space-y-6 animate-fade-in">
-              <div>
-                <h2 className="text-white font-bold text-2xl mb-2" style={{ fontFamily: "var(--font-plex-serif)", letterSpacing: "-0.02em" }}>
-                  Welcome back
-                </h2>
-                <p className="text-zinc-400 text-sm" style={{ fontFamily: "var(--font-writer)" }}>
-                  {DEMO_MODE ? "Enter the demo portal to explore" : "Sign in with your iVALT registered phone"}
-                </p>
-              </div>
-
-              {DEMO_MODE && (
-                <div className="flex items-start gap-3 p-4 rounded-xl" style={{ backgroundColor: "rgba(142,197,255,0.08)", border: "1px solid rgba(142,197,255,0.15)" }}>
-                  <FlaskConical className="w-5 h-5 mt-0.5 shrink-0" style={{ color: "#8ec5ff" }} />
-                  <div>
-                    <p className="text-white text-sm font-medium">Demo Mode Active</p>
-                    <p className="text-zinc-400 text-xs mt-1">No credentials needed — instant access with sample data</p>
-                  </div>
-                </div>
-              )}
-
+        {/* Card */}
+        <Card size="sm">
+          <CardContent className="p-5">
+            
+            {/* ── Step: Phone ──────────────────────────────────────────────── */}
+            {step === "phone" && (
               <div className="space-y-4">
-                {/* Phone input */}
                 <div>
-                  <label className="block text-zinc-300 text-sm font-medium mb-2" style={{ fontFamily: "var(--font-writer)" }}>
-                    Phone Number
-                  </label>
-                  <div className="flex rounded-xl overflow-hidden" style={{ backgroundColor: "#27272a", border: "1px solid rgba(255,255,255,0.08)" }}>
-                    {/* Country selector */}
-                    <div className="relative">
-                      <button
-                        type="button"
-                        onClick={() => !DEMO_MODE && setShowDropdown(!showDropdown)}
-                        className="flex items-center gap-2 px-4 py-3.5 border-r transition-all"
-                        style={{
-                          borderColor: "rgba(255,255,255,0.08)",
-                          cursor: DEMO_MODE ? "default" : "pointer",
-                          opacity: DEMO_MODE ? 0.5 : 1,
-                        }}
-                        onMouseEnter={(e) => !DEMO_MODE && (e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.04)")}
-                        onMouseLeave={(e) => !DEMO_MODE && (e.currentTarget.style.backgroundColor = "transparent")}
-                      >
-                        <span className="text-lg">{selectedCountry.flag}</span>
-                        <span className="text-sm text-zinc-300 font-medium" style={{ fontFamily: "var(--font-writer)" }}>{selectedCountry.code}</span>
-                        {!DEMO_MODE && <ChevronDown className="w-4 h-4 text-zinc-500" />}
-                      </button>
+                  <h2 className="text-lg font-semibold" style={{ color: "#1d1d1f", letterSpacing: "-0.01em" }}>
+                    {DEMO_MODE ? "Demo Access" : "Sign in"}
+                  </h2>
+                  <p className="text-xs mt-0.5" style={{ color: "#707070" }}>
+                    {DEMO_MODE ? "Instant access with sample data" : "Enter your phone number"}
+                  </p>
+                </div>
 
-                      {showDropdown && !DEMO_MODE && (
-                        <div className="absolute top-full left-0 z-50 mt-2 overflow-auto rounded-xl" style={{ backgroundColor: "#27272a", border: "1px solid rgba(255,255,255,0.1)", boxShadow: "0 20px 40px rgba(0,0,0,0.4)", maxHeight: "280px", width: "280px" }}>
-                          {COUNTRY_CODES.map((c, i) => (
-                            <button
-                              key={`${c.country}-${i}`}
-                              type="button"
-                              onClick={() => { setSelectedCountry(c); setShowDropdown(false); }}
-                              className="w-full flex items-center gap-3 px-4 py-3 text-left transition-colors"
-                              style={{ fontFamily: "var(--font-writer)" }}
-                              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "rgba(19,72,220,0.2)")}
-                              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
-                            >
-                              <span className="text-base">{c.flag}</span>
-                              <span className="text-sm flex-1 text-zinc-300">{c.name}</span>
-                              <span className="text-xs text-zinc-500">{c.code}</span>
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
+                {DEMO_MODE && (
+                  <div className="flex items-center gap-2 text-xs p-2.5 rounded-lg" style={{ backgroundColor: "#f5f5f7" }}>
+                    <FlaskConical className="w-4 h-4 shrink-0" style={{ color: "#707070" }} />
+                    <span style={{ color: "#474747" }}>Demo mode — no credentials needed</span>
+                  </div>
+                )}
+
+                {/* Phone input */}
+                <div className="space-y-1.5">
+                  <Label htmlFor="phone" className="text-xs">Phone Number</Label>
+                  <div className="flex rounded-lg overflow-hidden" style={{ backgroundColor: "#f5f5f7", border: "1px solid #e8e8ed" }}>
+                    <button
+                      type="button"
+                      onClick={() => !DEMO_MODE && setShowDropdown(!showDropdown)}
+                      className="flex items-center gap-1 px-3 py-2 border-r transition-colors"
+                      style={{ borderColor: "#e8e8ed", cursor: DEMO_MODE ? "default" : "pointer", opacity: DEMO_MODE ? 0.5 : 1 }}
+                      onMouseEnter={(e) => !DEMO_MODE && (e.currentTarget.style.backgroundColor = "#e8e8ed")}
+                      onMouseLeave={(e) => !DEMO_MODE && (e.currentTarget.style.backgroundColor = "transparent")}
+                    >
+                      <span>{selectedCountry.flag}</span>
+                      <span className="text-sm" style={{ color: "#1d1d1f" }}>{selectedCountry.code}</span>
+                      {!DEMO_MODE && <ChevronDown className="w-3 h-3" style={{ color: "#707070" }} />}
+                    </button>
+
+                    {showDropdown && !DEMO_MODE && (
+                      <div className="absolute top-full left-0 z-50 mt-1 rounded-lg overflow-auto" style={{ backgroundColor: "#ffffff", border: "1px solid #e8e8ed", boxShadow: "0 4px 16px rgba(0,0,0,0.1)", maxHeight: "200px", width: "220px" }}>
+                        {COUNTRY_CODES.map((c, i) => (
+                          <button
+                            key={`${c.country}-${i}`}
+                            type="button"
+                            onClick={() => { setSelectedCountry(c); setShowDropdown(false); }}
+                            className="w-full flex items-center gap-2 px-3 py-2 text-left text-sm transition-colors"
+                            style={{ fontFamily: "'Inter', system-ui" }}
+                            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#f5f5f7")}
+                            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
+                          >
+                            <span>{c.flag}</span>
+                            <span className="flex-1" style={{ color: "#1d1d1f" }}>{c.name}</span>
+                            <span className="text-xs" style={{ color: "#707070" }}>{c.code}</span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
 
                     <input
+                      id="phone"
                       type="tel"
                       value={phoneNumber}
                       onChange={(e) => !DEMO_MODE && setPhoneNumber(e.target.value)}
                       placeholder={DEMO_MODE ? "9876543210" : "98765 43210"}
                       readOnly={DEMO_MODE}
-                      className="flex-1 px-4 py-3.5 bg-transparent outline-none text-base text-white placeholder-zinc-500"
-                      style={{ fontFamily: "var(--font-writer)", cursor: DEMO_MODE ? "default" : "text" }}
+                      className="flex-1 px-3 py-2 bg-transparent outline-none text-sm placeholder:text-muted-foreground"
+                      style={{ color: "#1d1d1f", cursor: DEMO_MODE ? "default" : "text" }}
                       onKeyDown={(e) => e.key === "Enter" && handleSendAuth()}
                     />
                   </div>
                 </div>
 
-                {/* Info box */}
-                <div className="flex items-start gap-3 p-4 rounded-xl" style={{ backgroundColor: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)" }}>
-                  {DEMO_MODE
-                    ? <FlaskConical className="w-5 h-5 mt-0.5 shrink-0" style={{ color: "#8ec5ff" }} />
-                    : <Fingerprint className="w-5 h-5 mt-0.5 shrink-0" style={{ color: "#8ec5ff" }} />
-                  }
-                  <p className="text-sm text-zinc-400" style={{ fontFamily: "var(--font-writer)", lineHeight: 1.5 }}>
-                    {DEMO_MODE
-                      ? "Demo login bypasses biometric — you'll be taken directly to the portal with sample API keys and data."
-                      : "A biometric authentication request will be sent to your iVALT app. Approve with Face ID, fingerprint, or PIN."}
-                  </p>
-                </div>
-
-                {/* Submit button */}
-                <button
+                <Button
                   onClick={handleSendAuth}
                   disabled={isLoading || (!DEMO_MODE && !phoneNumber.trim())}
-                  className="w-full flex items-center justify-center gap-2 font-semibold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                  style={{
-                    backgroundColor: "#1348dc",
-                    color: "#ffffff",
-                    padding: "14px 24px",
-                    fontFamily: "var(--font-writer)",
-                    fontSize: "15px",
-                    boxShadow: "0 0 20px rgba(19,72,220,0.3)",
-                  }}
-                  onMouseEnter={(e) => !isLoading && (e.currentTarget.style.backgroundColor = "#1e5aee")}
-                  onMouseLeave={(e) => !isLoading && (e.currentTarget.style.backgroundColor = "#1348dc")}
+                  className="w-full"
+                  style={{ backgroundColor: "#0071e3" }}
                 >
                   {isLoading ? (
-                    <Loader2 className="w-5 h-5 animate-spin" />
+                    <Loader2 className="w-4 h-4 animate-spin" />
                   ) : DEMO_MODE ? (
                     <>
-                      <FlaskConical className="w-5 h-5" />
-                      Enter Demo Portal
+                      <FlaskConical className="w-4 h-4" />
+                      Enter Portal
                     </>
                   ) : (
                     <>
                       Continue
-                      <ArrowRight className="w-5 h-5" />
+                      <ArrowRight className="w-4 h-4" />
                     </>
                   )}
+                </Button>
+
+                <p className="text-xs text-center" style={{ color: "#707070" }}>
+                  {DEMO_MODE
+                    ? "Demo login bypasses biometric authentication"
+                    : "A notification will be sent to your iVALT app"}
+                </p>
+              </div>
+            )}
+
+            {/* ── Step: Waiting ─────────────────────────────────────────────── */}
+            {step === "waiting" && (
+              <div className="text-center space-y-4">
+                <div className="w-14 h-14 mx-auto rounded-xl flex items-center justify-center" style={{ backgroundColor: "#f5f5f7" }}>
+                  <Smartphone className="w-7 h-7" style={{ color: "#0071e3" }} />
+                </div>
+
+                <div>
+                  <h2 className="text-lg font-semibold" style={{ color: "#1d1d1f" }}>Check your phone</h2>
+                  <p className="text-xs mt-0.5" style={{ color: "#707070" }}>Sent to {fullNumber}</p>
+                </div>
+
+                <div className="text-xs text-left p-3 rounded-lg" style={{ backgroundColor: "#f5f5f7" }}>
+                  <p className="font-medium mb-2" style={{ color: "#1d1d1f" }}>How to approve:</p>
+                  <ol className="space-y-1 text-muted-foreground">
+                    <li>1. Open iVALT app</li>
+                    <li>2. Tap notification</li>
+                    <li>3. Verify with Face ID / fingerprint</li>
+                  </ol>
+                </div>
+
+                <div className="flex items-center justify-center gap-2 text-xs" style={{ color: "#707070" }}>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Waiting... ({Math.ceil((150 - pollCount) * 2)}s)
+                </div>
+
+                <button
+                  onClick={() => setStep("phone")}
+                  className="text-xs"
+                  style={{ color: "#0066cc" }}
+                >
+                  Use different number
                 </button>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* ── Step: Waiting ─────────────────────────────────────────────── */}
-          {step === "waiting" && (
-            <div className="text-center animate-fade-in">
-              <div className="mb-8">
-                {/* Animated phone icon */}
-                <div className="relative w-28 h-28 mx-auto mb-6">
-                  <div className="absolute inset-0 rounded-2xl animate-pulse" style={{ background: "linear-gradient(135deg, rgba(19,72,220,0.4) 0%, rgba(43,127,255,0.2) 100%)", filter: "blur(20px)" }} />
-                  <div className="relative w-full h-full rounded-2xl flex items-center justify-center" style={{ background: "linear-gradient(135deg, #1348dc 0%, #1e5aee 100%)" }}>
-                    <Smartphone className="w-12 h-12 text-white" />
-                  </div>
+            {/* ── Step: Success ─────────────────────────────────────────────── */}
+            {step === "success" && (
+              <div className="text-center space-y-4">
+                <div className="w-14 h-14 mx-auto rounded-xl flex items-center justify-center" style={{ backgroundColor: "#34c759" }}>
+                  <CheckCircle2 className="w-7 h-7 text-white" />
                 </div>
 
-                <h2 className="text-white font-bold text-2xl mb-3" style={{ fontFamily: "var(--font-plex-serif)" }}>
-                  Check your phone
-                </h2>
-                <p className="text-zinc-400 text-sm mb-1" style={{ fontFamily: "var(--font-writer)" }}>
-                  A notification was sent to
-                </p>
-                <p className="font-semibold text-lg" style={{ color: "#8ec5ff", fontFamily: "var(--font-writer)" }}>
-                  {fullNumber}
-                </p>
-              </div>
-
-              {/* Steps card */}
-              <div className="p-5 mb-6 rounded-xl text-left" style={{ backgroundColor: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)" }}>
-                <p className="text-white text-sm font-medium mb-4" style={{ fontFamily: "var(--font-writer)" }}>How to approve:</p>
-                <div className="space-y-3">
-                  {[
-                    { num: "01", text: "Open the iVALT app on your phone" },
-                    { num: "02", text: "Tap the authentication notification" },
-                    { num: "03", text: "Verify with Face ID, fingerprint, or PIN" },
-                  ].map((item) => (
-                    <div key={item.num} className="flex items-center gap-3">
-                      <div className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0" style={{ backgroundColor: "rgba(19,72,220,0.3)", color: "#8ec5ff" }}>
-                        {item.num}
-                      </div>
-                      <span className="text-zinc-400 text-sm" style={{ fontFamily: "var(--font-writer)" }}>{item.text}</span>
-                    </div>
-                  ))}
+                <div>
+                  <h2 className="text-lg font-semibold" style={{ color: "#1d1d1f" }}>
+                    {DEMO_MODE ? "Demo Access Granted!" : "Authenticated!"}
+                  </h2>
+                  <p className="text-xs mt-0.5" style={{ color: "#707070" }}>Redirecting...</p>
                 </div>
-              </div>
 
-              {/* Progress indicator */}
-              <div className="flex items-center justify-center gap-3 mb-4">
-                <Loader2 className="w-5 h-5 animate-spin" style={{ color: "#8ec5ff" }} />
-                <span className="text-zinc-400 text-sm" style={{ fontFamily: "var(--font-writer)" }}>
-                  Waiting for approval...
-                </span>
-              </div>
-
-              <button
-                onClick={() => setStep("phone")}
-                className="text-sm transition-colors"
-                style={{ color: "#8ec5ff", fontFamily: "var(--font-writer)" }}
-                onMouseEnter={(e) => (e.currentTarget.style.color = "#a8c5ff")}
-                onMouseLeave={(e) => (e.currentTarget.style.color = "#8ec5ff")}
-              >
-                Use a different number
-              </button>
-
-              <p className="text-zinc-600 text-xs mt-4" style={{ fontFamily: "var(--font-writer)" }}>
-                Timeout in {Math.ceil((150 - pollCount) * 2)}s
-              </p>
-            </div>
-          )}
-
-          {/* ── Step: Success ─────────────────────────────────────────────── */}
-          {step === "success" && (
-            <div className="text-center animate-fade-in">
-              <div className="relative w-28 h-28 mx-auto mb-6">
-                <div className="absolute inset-0 rounded-2xl animate-ping opacity-20" style={{ backgroundColor: "#1348dc", filter: "blur(20px)" }} />
-                <div className="relative w-full h-full rounded-2xl flex items-center justify-center" style={{ background: "linear-gradient(135deg, #10b981 0%, #059669 100%)", boxShadow: "0 0 30px rgba(16,185,129,0.3)" }}>
-                  <CheckCircle2 className="w-12 h-12 text-white" />
-                </div>
-              </div>
-
-              <h2 className="text-white font-bold text-2xl mb-2" style={{ fontFamily: "var(--font-plex-serif)" }}>
-                {DEMO_MODE ? "Demo Access Granted!" : "Authenticated!"}
-              </h2>
-              <p className="text-zinc-400 text-sm" style={{ fontFamily: "var(--font-writer)" }}>
-                Redirecting to your dashboard...
-              </p>
-
-              <div className="mt-6 flex justify-center">
-                <div className="flex items-center gap-1">
+                <div className="flex items-center justify-center gap-1">
                   {[0, 1, 2].map((i) => (
                     <div
                       key={i}
-                      className="w-2 h-2 rounded-full animate-bounce"
-                      style={{ backgroundColor: "#8ec5ff", animationDelay: `${i * 150}ms` }}
+                      className="w-1.5 h-1.5 rounded-full animate-bounce"
+                      style={{ backgroundColor: "#0071e3", animationDelay: `${i * 150}ms` }}
                     />
                   ))}
                 </div>
               </div>
-            </div>
-          )}
+            )}
+          </CardContent>
+        </Card>
 
-          {/* Footer */}
-          <div className="mt-10 pt-6 border-t" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
-            <div className="flex items-center justify-between text-xs text-zinc-500" style={{ fontFamily: "var(--font-writer)" }}>
-              <div className="flex items-center gap-2">
-                <Lock className="w-3.5 h-3.5" />
-                <span>End-to-end encrypted</span>
-              </div>
-              <span>© 2025 iVALT Inc.</span>
-            </div>
-          </div>
+        {/* Footer */}
+        <div className="flex items-center justify-center gap-1.5 mt-6 text-xs" style={{ color: "#707070" }}>
+          <Lock className="w-3 h-3" />
+          <span>End-to-end encrypted</span>
         </div>
       </div>
     </div>
