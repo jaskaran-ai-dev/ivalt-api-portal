@@ -79,7 +79,7 @@ export default async function DashboardPage() {
                 </span>
               </div>
               <div className="max-w-3xl">
-                <h2 className="text-4xl font-semibold tracking-[-0.03em] text-foreground sm:text-5xl lg:text-6xl">
+                <h2 className="text-3xl font-semibold tracking-[-0.03em] text-foreground sm:text-4xl lg:text-5xl">
                   Secure API access, ready for biometric auth.
                 </h2>
                 <p className="mt-5 max-w-2xl text-base leading-7 text-muted-foreground sm:text-lg">
