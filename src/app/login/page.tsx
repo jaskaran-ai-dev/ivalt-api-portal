@@ -148,7 +148,7 @@ export default function LoginPage() {
               <Lock className="mr-1 size-3" />
               Passwordless biometric access
             </Badge>
-            <h1 className="text-5xl font-semibold tracking-[-0.04em] text-foreground xl:text-7xl">
+            <h1 className="text-3xl font-semibold tracking-[-0.04em] text-foreground xl:text-5xl ">
               Sign in with a verified human signal.
             </h1>
             <p className="mt-6 max-w-xl text-lg leading-8 text-muted-foreground">
