@@ -13,6 +13,13 @@ import {
   AlertTriangle,
   X,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
 
 interface ApiKey {
   id: string;
@@ -133,367 +140,201 @@ export default function KeysPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="w-6 h-6 animate-spin" style={{ color: "#1348dc" }} />
+        <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
       </div>
     );
   }
 
   return (
-    <div className="max-w-3xl mx-auto animate-fade-in-up">
+    <div className="max-w-3xl mx-auto space-y-6">
       {/* Header */}
-      <div className="flex items-start justify-between mb-8 gap-4">
+      <div className="flex items-start justify-between gap-4">
         <div>
-          <h2
-            className="font-bold text-2xl mb-1"
-            style={{ fontFamily: "'IBM Plex Serif', serif", color: "#3a3d43", letterSpacing: "-0.52px" }}
-          >
-            API Keys
-          </h2>
-          <p className="text-sm" style={{ color: "#5d636f", fontFamily: "'Inter', sans-serif", letterSpacing: "-0.025em" }}>
+          <h2 className="text-2xl font-bold">API Keys</h2>
+          <p className="text-sm text-muted-foreground mt-1">
             {keys.length} of {MAX_KEYS} keys used
           </p>
         </div>
         {keys.length < MAX_KEYS && !showCreate && (
-          <button
-            onClick={() => setShowCreate(true)}
-            className="inline-flex items-center gap-2 font-semibold text-sm shrink-0"
-            style={{
-              backgroundColor: "#1348dc",
-              color: "#fff",
-              padding: "10px 20px",
-              borderRadius: "2px",
-              fontFamily: "'Inter', sans-serif",
-              letterSpacing: "-0.025em",
-              boxShadow: "rgb(5, 55, 148) 0px -2px 0px 0px inset",
-            }}
-          >
-            <Plus className="w-5 h-5" />
+          <Button onClick={() => setShowCreate(true)}>
+            <Plus className="w-4 h-4" />
             New Key
-          </button>
+          </Button>
         )}
       </div>
 
-      {/* Newly created key — show full value once */}
+      {/* Newly created key */}
       {newlyCreatedKey && (
-        <div
-          className="mb-6 p-5 border relative"
-          style={{
-            backgroundColor: "#f4f4f2",
-            borderColor: "#a1c181",
-            borderRadius: "2px",
-          }}
-        >
-          <button
-            className="absolute top-4 right-4"
-            style={{ color: "#b2b5bb" }}
-            onClick={() => setNewlyCreatedKey(null)}
-          >
-            <X className="w-5 h-5" />
-          </button>
-          <div className="flex items-center gap-2 mb-3">
-            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: "#a1c181" }} />
-            <p className="text-sm font-semibold" style={{ color: "#3a3d43", fontFamily: "'Inter', sans-serif" }}>
-              Key created — copy it now, you won't see it again
-            </p>
-          </div>
-          <div
-            className="flex items-center gap-3 p-3 border"
-            style={{ backgroundColor: "#fff", borderColor: "#cccfd3", borderRadius: "2px" }}
-          >
-            <code
-              className="flex-1 text-xs break-all"
-              style={{ color: "#3a3d43", fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.05em" }}
-            >
-              {newlyCreatedKey.value}
-            </code>
-            <button
-              onClick={() => copyToClipboard(newlyCreatedKey.value, "API key copied!")}
-              className="shrink-0 p-2 transition-colors"
-              style={{ borderRadius: "2px" }}
-              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#f4f4f2")}
-              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
-            >
-              <Copy className="w-5 h-5" style={{ color: "#1348dc" }} />
-            </button>
-          </div>
-        </div>
+        <Card className="border-green-500/50 bg-green-500/5">
+          <CardContent className="pt-4">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-green-500" />
+                <p className="text-sm font-medium">Key created — copy it now, you won&apos;t see it again</p>
+              </div>
+              <Button variant="ghost" size="icon" onClick={() => setNewlyCreatedKey(null)}>
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+            <div className="flex items-center gap-3 p-3 rounded-lg bg-background border">
+              <code className="flex-1 text-xs break-all font-mono">
+                {newlyCreatedKey.value}
+              </code>
+              <Button variant="ghost" size="icon" onClick={() => copyToClipboard(newlyCreatedKey.value, "API key copied!")}>
+                <Copy className="w-4 h-4" />
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       )}
 
       {/* Create new key form */}
       {showCreate && (
-        <div
-          className="mb-6 p-5 border"
-          style={{
-            backgroundColor: "#fff",
-            borderRadius: "2px",
-            borderColor: "#cccfd3",
-            boxShadow: "rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.1) 0px 1px 2px -1px",
-          }}
-        >
-          <h3
-            className="font-semibold text-base mb-4"
-            style={{ fontFamily: "'IBM Plex Serif', serif", color: "#3a3d43", letterSpacing: "-0.02em" }}
-          >
-            Create New API Key
-          </h3>
-          <div className="flex gap-3">
-            <div className="flex-1">
-              <input
-                type="text"
-                value={newKeyName}
-                onChange={(e) => setNewKeyName(e.target.value)}
-                placeholder="e.g. Production App, Mobile SDK"
-                className="w-full px-4 py-3 border text-sm outline-none"
-                style={{
-                  borderColor: "#cccfd3",
-                  borderRadius: "2px",
-                  fontFamily: "'Inter', sans-serif",
-                  letterSpacing: "-0.025em",
-                  color: "#3a3d43",
-                  backgroundColor: "#f4f4f2",
-                }}
-                onKeyDown={(e) => e.key === "Enter" && handleCreate()}
-                autoFocus
-              />
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Create New API Key</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex gap-3">
+              <div className="flex-1 space-y-2">
+                <Label htmlFor="keyName">Key Name</Label>
+                <Input
+                  id="keyName"
+                  value={newKeyName}
+                  onChange={(e) => setNewKeyName(e.target.value)}
+                  placeholder="e.g. Production App, Mobile SDK"
+                  onKeyDown={(e) => e.key === "Enter" && handleCreate()}
+                />
+              </div>
+              <div className="flex items-end gap-2">
+                <Button onClick={handleCreate} disabled={creating}>
+                  {creating && <Loader2 className="w-4 h-4 animate-spin" />}
+                  Create
+                </Button>
+                <Button variant="outline" onClick={() => { setShowCreate(false); setNewKeyName(""); }}>
+                  Cancel
+                </Button>
+              </div>
             </div>
-            <button
-              onClick={handleCreate}
-              disabled={creating}
-              className="flex items-center gap-2 font-semibold text-sm shrink-0"
-              style={{
-                backgroundColor: "#1348dc",
-                color: "#fff",
-                padding: "10px 20px",
-                borderRadius: "2px",
-                fontFamily: "'Inter', sans-serif",
-                boxShadow: "rgb(5, 55, 148) 0px -2px 0px 0px inset",
-              }}
-            >
-              {creating ? <Loader2 className="w-5 h-5 animate-spin" /> : "Create"}
-            </button>
-            <button
-              onClick={() => { setShowCreate(false); setNewKeyName(""); }}
-              className="p-3 border text-sm"
-              style={{ borderColor: "#cccfd3", color: "#5d636f", borderRadius: "2px" }}
-            >
-              Cancel
-            </button>
-          </div>
-          <p className="text-xs mt-2" style={{ color: "#5d636f", fontFamily: "'Inter', sans-serif", letterSpacing: "-0.025em" }}>
-            Name must be at least 3 characters. The key value is shown only once after creation.
-          </p>
-        </div>
+            <p className="text-xs text-muted-foreground">
+              Name must be at least 3 characters. The key value is shown only once after creation.
+            </p>
+          </CardContent>
+        </Card>
       )}
 
       {/* Keys limit warning */}
       {keys.length >= MAX_KEYS && (
-        <div
-          className="mb-6 flex items-center gap-3 p-4 border"
-          style={{ backgroundColor: "#fff", borderColor: "#dec184", borderRadius: "2px" }}
-        >
-          <AlertTriangle className="w-5 h-5 shrink-0" style={{ color: "#dec184" }} />
-          <p className="text-sm" style={{ color: "#464b57", fontFamily: "'Inter', sans-serif", letterSpacing: "-0.025em" }}>
-            Maximum of {MAX_KEYS} API keys reached. Delete an existing key to create a new one.
-          </p>
-        </div>
+        <Card className="border-amber-500/50 bg-amber-500/5">
+          <CardContent className="py-3 flex items-center gap-3">
+            <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />
+            <p className="text-sm">Maximum of {MAX_KEYS} API keys reached. Delete an existing key to create a new one.</p>
+          </CardContent>
+        </Card>
       )}
 
       {/* Keys list */}
       {keys.length === 0 ? (
-        <div
-          className="text-center py-16 border border-dashed"
-          style={{ borderColor: "#cccfd3", borderRadius: "2px" }}
-        >
-          <Key className="w-10 h-10 mx-auto mb-4" style={{ color: "#b2b5bb" }} />
-          <h3
-            className="font-semibold text-base mb-2"
-            style={{ fontFamily: "'IBM Plex Serif', serif", color: "#3a3d43" }}
-          >
-            No API keys yet
-          </h3>
-          <p className="text-sm mb-6" style={{ color: "#5d636f", fontFamily: "'Inter', sans-serif", letterSpacing: "-0.025em" }}>
-            Create your first API key to start integrating iVALT biometric auth
-          </p>
-          <button
-            onClick={() => setShowCreate(true)}
-            className="inline-flex items-center gap-2 font-semibold text-sm"
-            style={{
-              backgroundColor: "#1348dc",
-              color: "#fff",
-              padding: "10px 20px",
-              borderRadius: "2px",
-              fontFamily: "'Inter', sans-serif",
-              boxShadow: "rgb(5, 55, 148) 0px -2px 0px 0px inset",
-            }}
-          >
-            <Plus className="w-5 h-5" />
-            Create First Key
-          </button>
-        </div>
+        <Card className="border-dashed">
+          <CardContent className="py-16 text-center">
+            <Key className="w-10 h-10 mx-auto mb-4 text-muted-foreground" />
+            <h3 className="font-semibold text-lg mb-2">No API keys yet</h3>
+            <p className="text-sm text-muted-foreground mb-6">
+              Create your first API key to start integrating iVALT biometric auth
+            </p>
+            <Button onClick={() => setShowCreate(true)}>
+              <Plus className="w-4 h-4" />
+              Create First Key
+            </Button>
+          </CardContent>
+        </Card>
       ) : (
-        <div className="space-y-2 stagger-children">
+        <div className="space-y-3">
           {keys.map((key) => (
-            <div
-              key={key.id}
-              className="animate-fade-in-up p-5 border"
-              style={{
-                backgroundColor: "#fff",
-                borderRadius: "2px",
-                borderColor: key.isActive ? "#cccfd3" : "#d07277",
-                boxShadow: "rgba(111, 123, 144, 0.05) 0px -2px 0px 0px inset",
-                opacity: key.isActive ? 1 : 0.75,
-              }}
-            >
-              <div className="flex items-start gap-4">
-                <div
-                  className="w-10 h-10 flex items-center justify-center shrink-0"
-                  style={{ backgroundColor: key.isActive ? "#bedbff" : "#f4f4f2", borderRadius: "2px" }}
-                >
-                  <Key
-                    className="w-6 h-6"
-                    style={{ color: key.isActive ? "#1348dc" : "#b2b5bb" }}
-                  />
-                </div>
-
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1 flex-wrap">
-                    <p
-                      className="font-semibold text-sm"
-                      style={{ fontFamily: "'Inter', sans-serif", color: "#3a3d43", letterSpacing: "-0.025em" }}
-                    >
-                      {key.keyName}
-                    </p>
-                    <span
-                      className="text-xs px-2 py-0.5 font-medium"
-                      style={{
-                        backgroundColor: key.isActive ? "#bedbff" : "#f4f4f2",
-                        color: key.isActive ? "#1348dc" : "#b2b5bb",
-                        fontFamily: "'Inter', sans-serif",
-                        borderRadius: "2px",
-                      }}
-                    >
-                      {key.isActive ? "Active" : "Disabled"}
-                    </span>
+            <Card key={key.id} className={!key.isActive ? "opacity-75" : ""}>
+              <CardContent className="py-4 px-5">
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center shrink-0">
+                    <Key className={`w-5 h-5 ${key.isActive ? "text-primary" : "text-muted-foreground"}`} />
                   </div>
 
-                  {/* Masked key */}
-                  <div className="flex items-center gap-2 mb-2">
-                    <code
-                      className="text-xs"
-                      style={{ color: "#5d636f", fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.05em" }}
-                    >
-                      {key.keyValue || "••••••••••••••••••••••••"}
-                    </code>
-                    {key.keyValue && (
-                      <button
-                        onClick={() => copyToClipboard(key.keyValue!, "Key prefix copied")}
-                        className="p-1 transition-colors"
-                        style={{ borderRadius: "2px" }}
-                        onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#f4f4f2")}
-                        onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
-                      >
-                        <Copy className="w-4 h-4" style={{ color: "#5d636f" }} />
-                      </button>
-                    )}
-                  </div>
-
-                  <p className="text-xs" style={{ color: "#b2b5bb", fontFamily: "'Inter', sans-serif", letterSpacing: "-0.025em" }}>
-                    Created {formatDate(key.createdAt)} · AWS ID: {key.awsKeyId.slice(0, 12)}…
-                  </p>
-                </div>
-
-                {/* Actions */}
-                <div className="flex items-center gap-2 shrink-0">
-                  {/* Toggle */}
-                  <button
-                    onClick={() => handleToggle(key.id, key.isActive)}
-                    disabled={togglingId === key.id}
-                    title={key.isActive ? "Disable key" : "Enable key"}
-                    className="p-2 transition-colors"
-                    style={{ borderRadius: "2px" }}
-                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#f4f4f2")}
-                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
-                  >
-                    {togglingId === key.id ? (
-                      <Loader2 className="w-5 h-5 animate-spin" style={{ color: "#5d636f" }} />
-                    ) : key.isActive ? (
-                      <ToggleRight className="w-6 h-6" style={{ color: "#1348dc" }} />
-                    ) : (
-                      <ToggleLeft className="w-6 h-6" style={{ color: "#b2b5bb" }} />
-                    )}
-                  </button>
-
-                  {/* Delete */}
-                  {deleteConfirm === key.id ? (
-                    <div className="flex items-center gap-1">
-                      <button
-                        onClick={() => handleDelete(key.id)}
-                        disabled={deletingId === key.id}
-                        className="px-3 py-1.5 text-xs font-medium"
-                        style={{ backgroundColor: "#d07277", color: "#fff", fontFamily: "'Inter', sans-serif", borderRadius: "2px" }}
-                      >
-                        {deletingId === key.id ? <Loader2 className="w-4 h-4 animate-spin" /> : "Delete"}
-                      </button>
-                      <button
-                        onClick={() => setDeleteConfirm(null)}
-                        className="px-3 py-1.5 text-xs font-medium border"
-                        style={{ borderColor: "#cccfd3", color: "#5d636f", fontFamily: "'Inter', sans-serif", borderRadius: "2px" }}
-                      >
-                        Cancel
-                      </button>
+                  <div className="flex-1 min-w-0 space-y-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <p className="font-semibold">{key.keyName}</p>
+                      <Badge variant={key.isActive ? "default" : "secondary"}>
+                        {key.isActive ? "Active" : "Disabled"}
+                      </Badge>
                     </div>
-                  ) : (
-                    <button
-                      onClick={() => setDeleteConfirm(key.id)}
-                      className="p-2 transition-colors"
-                      style={{ borderRadius: "2px" }}
-                      onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#f4f4f2")}
-                      onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
-                    >
-                      <Trash2 className="w-5 h-5" style={{ color: "#b2b5bb" }} />
-                    </button>
-                  )}
+
+                    <div className="flex items-center gap-2">
+                      <code className="text-xs text-muted-foreground font-mono">
+                        {key.keyValue || "••••••••••••••••••••••••"}
+                      </code>
+                      {key.keyValue && (
+                        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => copyToClipboard(key.keyValue!, "Key prefix copied")}>
+                          <Copy className="w-3 h-3" />
+                        </Button>
+                      )}
+                    </div>
+
+                    <p className="text-xs text-muted-foreground">
+                      Created {formatDate(key.createdAt)} · AWS ID: {key.awsKeyId.slice(0, 12)}…
+                    </p>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex items-center gap-2 shrink-0">
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        checked={key.isActive}
+                        onCheckedChange={() => handleToggle(key.id, key.isActive)}
+                        disabled={togglingId === key.id}
+                      />
+                      {deleteConfirm === key.id ? (
+                        <div className="flex items-center gap-1">
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => handleDelete(key.id)}
+                            disabled={deletingId === key.id}
+                          >
+                            {deletingId === key.id ? <Loader2 className="w-4 h-4 animate-spin" /> : "Delete"}
+                          </Button>
+                          <Button size="sm" variant="outline" onClick={() => setDeleteConfirm(null)}>
+                            Cancel
+                          </Button>
+                        </div>
+                      ) : (
+                        <Button variant="ghost" size="icon" onClick={() => setDeleteConfirm(key.id)}>
+                          <Trash2 className="w-4 h-4 text-muted-foreground" />
+                        </Button>
+                      )}
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           ))}
         </div>
       )}
 
       {/* Usage guide */}
-      <div
-        className="mt-8 p-6 border"
-        style={{
-          backgroundColor: "#fff",
-          borderRadius: "2px",
-          borderColor: "#cccfd3",
-          boxShadow: "rgba(111, 123, 144, 0.05) 0px -2px 0px 0px inset",
-        }}
-      >
-        <h3
-          className="font-semibold text-sm mb-4"
-          style={{ fontFamily: "'IBM Plex Serif', serif", color: "#3a3d43", letterSpacing: "-0.02em" }}
-        >
-          Using your API Key
-        </h3>
-        <div
-          className="p-4 mb-3"
-          style={{ backgroundColor: "#282c33", borderRadius: "2px" }}
-        >
-          <p className="text-xs mb-1" style={{ color: "#8ec5ff", fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.05em" }}>
-            # Include in request headers
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Using your API Key</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="p-4 rounded-lg bg-muted font-mono text-xs space-y-1">
+            <p className="text-muted-foreground mb-2">// Include in request headers</p>
+            <p>x-api-key: YOUR_API_KEY</p>
+            <p>token: YOUR_IVALT_SECURITY_TOKEN</p>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Include your API key in the <code className="bg-muted px-1 rounded">x-api-key</code> header for all requests to the iVALT API.
+            The <code className="bg-muted px-1 rounded">token</code> header is your iVALT security token from the admin panel.
           </p>
-          <code className="text-xs block" style={{ color: "#e5e7eb", fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.05em", lineHeight: 1.7 }}>
-            x-api-key: YOUR_API_KEY
-            <br />
-            token: YOUR_IVALT_SECURITY_TOKEN
-          </code>
-        </div>
-        <p className="text-xs" style={{ color: "#5d636f", fontFamily: "'Inter', sans-serif", letterSpacing: "-0.025em" }}>
-          Include your API key in the <code style={{ fontFamily: "'IBM Plex Mono', monospace" }}>x-api-key</code> header for all requests to the iVALT API.
-          The <code style={{ fontFamily: "'IBM Plex Mono', monospace" }}>token</code> header is your iVALT security token from the admin panel.
-        </p>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
