@@ -100,3 +100,27 @@ coverage/
 
 # Stores VSCode versions used for testing VSCode extensions
 .vscode-test
+
+# Command code and snapshot files
+.commandcode/
+codedb.snapshot
+
+# Additional development files
+*.tsbuildinfo
+*.lock
+build-manifest.json
+fallback-build-manifest.json
+route-bundle-stats.json
+framework.json
+build-diagnostics.json
+export-marker.json
+app-path-routes-manifest.json
+
+# AWS/Cloud specific
+.aws/
+.serverless/
+
+# Testing
+test-results/
+playwright-report/
+.nyc_output/
