@@ -161,34 +161,12 @@ function SidebarContentLayout({ children, phoneNumber, demoMode }: DashboardShel
                     </a>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton 
-                    tooltip="Help & Support"
-                    asChild
-                  >
-                    <Link href="#">
-                      <HelpCircle className="w-5 h-5" />
-                      <span className="group-data-[state=collapsed]:hidden">Help</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton 
-                    tooltip="Settings"
-                    asChild
-                  >
-                    <Link href="#">
-                      <Settings className="w-5 h-5" />
-                      <span className="group-data-[state=collapsed]:hidden">Settings</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
         </SidebarContent>
 
-        <SidebarFooter className="border-t border-sidebar-border px-2 py-2">
+        <SidebarFooter className="border-t border-sidebar-border px-2 py-2 pb-24">
           {/* User section */}
           <div className="mb-2 px-2 group-data-[state=collapsed]:hidden">
             <div className="flex items-center gap-3 rounded-2xl border border-sidebar-border/80 bg-sidebar-accent/80 p-2.5">

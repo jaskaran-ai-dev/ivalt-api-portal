@@ -161,7 +161,7 @@ export default function KeysPage() {
                 <span className="text-xs font-medium tracking-[0.08em] text-muted-foreground uppercase">Keys are shown once</span>
               </div>
               <div className="max-w-3xl">
-                <h2 className="text-4xl font-semibold tracking-[-0.03em] text-foreground sm:text-5xl lg:text-6xl">
+                <h2 className="text-2xl font-semibold tracking-[-0.03em] text-foreground sm:text-3xl lg:text-4xl">
                   Keep every integration keyed and controlled.
                 </h2>
                 <p className="mt-5 max-w-2xl text-base leading-7 text-muted-foreground sm:text-lg">
@@ -206,7 +206,7 @@ export default function KeysPage() {
               </div>
             </div>
             <Separator />
-            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
+            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-2">
               <div className="rounded-2xl border border-border/80 bg-background/70 p-4">
                 <p className="text-xs font-medium tracking-[0.08em] text-muted-foreground uppercase">Active</p>
                 <p className="mt-2 text-3xl font-semibold tracking-[-0.03em]">{activeCount}</p>

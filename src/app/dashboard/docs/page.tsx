@@ -79,10 +79,10 @@ const endpoints = [
   },
   {
     method: "POST",
-    path: "/BiometricResultRequest",
+    path: "/biometric-auth-result",
     name: "Poll authentication result",
     description: "Poll every 2 seconds until the user approves, rejects, times out, or cannot be found.",
-    code: `curl -X POST https://api.ivalt.com/BiometricResultRequest \\
+    code: `curl -X POST https://api.ivalt.com/biometric-auth-result \\
   -H "Content-Type: application/json" \\
   -H "token: YOUR_IVALT_SECURITY_TOKEN" \\
   -H "x-api-key: YOUR_API_KEY" \\
@@ -103,10 +103,10 @@ const endpoints = [
   },
   {
     method: "POST",
-    path: "/BiometricGeoFenceResult",
+    path: "/biometric-auth-result",
     name: "Geo-fence authentication",
     description: "Verify biometric approval together with a latitude, longitude, and allowed radius.",
-    code: `curl -X POST https://api.ivalt.com/BiometricGeoFenceResult \\
+    code: `curl -X POST https://api.ivalt.com/biometric-auth-result \\
   -H "Content-Type: application/json" \\
   -H "token: YOUR_IVALT_SECURITY_TOKEN" \\
   -H "x-api-key: YOUR_API_KEY" \\
@@ -156,7 +156,7 @@ export default function DocsPage() {
                 <span className="text-xs font-medium tracking-[0.08em] text-muted-foreground uppercase">Biometric auth contract</span>
               </div>
               <div className="max-w-3xl">
-                <h2 className="text-4xl font-semibold tracking-[-0.03em] text-foreground sm:text-5xl lg:text-6xl">
+                <h2 className="text-2xl font-semibold tracking-[-0.03em] text-foreground sm:text-3xl lg:text-4xl">
                   Integrate the iVALT flow without guessing states.
                 </h2>
                 <p className="mt-5 max-w-2xl text-base leading-7 text-muted-foreground sm:text-lg">
@@ -206,8 +206,7 @@ export default function DocsPage() {
             <div className="grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
               {[
                 "REST API",
-                "JSON responses",
-                "Webhook-ready",
+                "JSON responses"
               ].map((item) => (
                 <div key={item} className="flex items-center gap-2 rounded-2xl border border-border/80 bg-background/70 px-3 py-2 text-sm font-medium">
                   <Check className="size-4 text-emerald-700" />
@@ -260,7 +259,7 @@ export default function DocsPage() {
         </div>
 
         {endpoints.map((endpoint, index) => (
-          <Card key={endpoint.path} className="overflow-hidden border-primary/10 bg-card shadow-sm shadow-foreground/5" id={endpoint.path.replace("/", "")}>
+          <Card key={index} className="overflow-hidden border-primary/10 bg-card shadow-sm shadow-foreground/5" id={endpoint.path.replace("/", "") + "-" + index}>
             <div className="border-b border-border/80 bg-muted/35 p-6">
               <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                 <div className="flex flex-col gap-3">
