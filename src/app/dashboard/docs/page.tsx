@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
-import { Copy, ExternalLink, ChevronRight, Check, AlertCircle } from "lucide-react";
+import { AlertCircle, ArrowRight, Check, Copy, FileCode2, KeyRound, RadioTower, ShieldCheck, Timer, Waypoints } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { cn } from "@/lib/utils";
 
 const copyToClipboard = (text: string) => {
   navigator.clipboard.writeText(text);
@@ -15,109 +16,97 @@ const copyToClipboard = (text: string) => {
 
 function CodeBlock({ code, language = "bash" }: { code: string; language?: string }) {
   return (
-    <div className="relative rounded-lg overflow-hidden border bg-zinc-950 text-zinc-100">
-      <div className="flex items-center justify-between px-4 py-2 border-b border-zinc-800 bg-zinc-900">
-        <div className="flex items-center gap-2">
-          <div className="flex gap-1.5">
-            <div className="w-3 h-3 rounded-full bg-red-500" />
-            <div className="w-3 h-3 rounded-full bg-yellow-500" />
-            <div className="w-3 h-3 rounded-full bg-green-500" />
+    <div className="overflow-hidden rounded-2xl border border-foreground/10 bg-[#17121a] text-[#f6f0f7] shadow-sm shadow-foreground/5">
+      <div className="flex items-center justify-between border-b border-white/10 bg-white/[0.03] px-4 py-3">
+        <div className="flex items-center gap-3">
+          <div className="flex gap-1.5" aria-hidden="true">
+            <div className="size-2.5 rounded-full bg-[#e57373]" />
+            <div className="size-2.5 rounded-full bg-[#d8b24c]" />
+            <div className="size-2.5 rounded-full bg-[#70b98f]" />
           </div>
-          <span className="text-xs text-zinc-500 ml-2">{language}</span>
+          <span className="text-xs font-medium tracking-[0.12em] text-white/45 uppercase">{language}</span>
         </div>
         <button
           onClick={() => copyToClipboard(code)}
-          className="flex items-center gap-1.5 text-xs text-zinc-400 hover:text-white transition-colors px-2 py-1 rounded hover:bg-zinc-800"
+          className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium text-white/60 transition-colors hover:bg-white/10 hover:text-white"
         >
-          <Copy className="w-3 h-3" />
+          <Copy className="size-3.5" />
           Copy
         </button>
       </div>
-      <pre className="p-4 overflow-x-auto text-sm font-mono leading-relaxed">{code}</pre>
+      <pre className="overflow-x-auto p-4 text-sm leading-7"><code>{code}</code></pre>
     </div>
   );
 }
 
 function StatusBadge({ code, label, type }: { code: string; label: string; type: "success" | "error" | "warning" | "info" }) {
   const colors = {
-    success: "bg-green-500/10 text-green-600 border-green-500/20",
-    error: "bg-red-500/10 text-red-600 border-red-500/20",
-    warning: "bg-yellow-500/10 text-yellow-600 border-yellow-500/20",
-    info: "bg-blue-500/10 text-blue-600 border-blue-500/20",
+    success: "border-emerald-500/20 bg-emerald-500/10 text-emerald-700",
+    error: "border-destructive/20 bg-destructive/10 text-destructive",
+    warning: "border-amber-500/25 bg-amber-500/10 text-amber-700",
+    info: "border-primary/15 bg-primary/10 text-primary",
   };
+
   return (
-    <div className={`flex items-center gap-2 px-3 py-2 rounded-md border ${colors[type]}`}>
-      <span className="font-mono text-sm font-semibold">{code}</span>
-      <span className="text-sm">{label}</span>
+    <div className={cn("flex items-center gap-2 rounded-full border px-3 py-1.5", colors[type])}>
+      <span className="font-mono text-xs font-semibold">{code}</span>
+      <span className="text-xs font-medium">{label}</span>
     </div>
   );
 }
 
-export default function DocsPage() {
-  const [activeSection, setActiveSection] = useState("introduction");
-
-  const sections = [
-    { id: "introduction", label: "Introduction" },
-    { id: "authentication", label: "Authentication" },
-    { id: "endpoints", label: "Endpoints" },
-    { id: "errors", label: "Error Codes" },
-  ];
-
-  const endpoints = [
-    {
-      method: "POST",
-      path: "/BiometricAuthRequest",
-      name: "Initiate Authentication",
-      description: "Triggers a biometric authentication push notification to the user's iVALT mobile app. This is always Step 1 of the auth flow.",
-      requiresAuth: true,
-      code: `curl -X POST https://api.ivalt.com/BiometricAuthRequest \\
+const endpoints = [
+  {
+    method: "POST",
+    path: "/biometric-auth-request",
+    name: "Initiate authentication",
+    description: "Send a biometric approval request to the user's iVALT mobile app. This starts every sign-in flow.",
+    code: `curl -X POST https://api.ivalt.com/biometric-auth-request \\
   -H "Content-Type: application/json" \\
   -H "token: YOUR_IVALT_SECURITY_TOKEN" \\
   -H "x-api-key: YOUR_API_KEY" \\
   -d '{"mobile_number": "+919876543210"}'`,
-      response: `{
+    response: `{
   "success": true,
   "message": "Authentication request sent",
   "request_id": "auth_abc123xyz"
 }`,
-      statusCodes: [
-        { code: "200", label: "Success", type: "success" as const },
-        { code: "404", label: "User Not Found", type: "error" as const },
-        { code: "403", label: "Invalid Token", type: "error" as const },
-      ],
-    },
-    {
-      method: "POST",
-      path: "/BiometricResultRequest",
-      name: "Poll Authentication Result",
-      description: "Poll this endpoint every 2 seconds to check authentication status. Continue polling until you receive 200, 403, or 404.",
-      requiresAuth: true,
-      code: `curl -X POST https://api.ivalt.com/BiometricResultRequest \\
+    statusCodes: [
+      { code: "200", label: "Success", type: "success" as const },
+      { code: "404", label: "User not found", type: "error" as const },
+      { code: "403", label: "Invalid token", type: "error" as const },
+    ],
+  },
+  {
+    method: "POST",
+    path: "/BiometricResultRequest",
+    name: "Poll authentication result",
+    description: "Poll every 2 seconds until the user approves, rejects, times out, or cannot be found.",
+    code: `curl -X POST https://api.ivalt.com/BiometricResultRequest \\
   -H "Content-Type: application/json" \\
   -H "token: YOUR_IVALT_SECURITY_TOKEN" \\
   -H "x-api-key: YOUR_API_KEY" \\
   -d '{"mobile_number": "+919876543210"}'`,
-      response: `{
+    response: `{
   "authenticated": true,
   "user": {
     "mobile_number": "+919876543210",
     "verified_at": "2025-05-07T10:30:00Z"
   }
 }`,
-      statusCodes: [
-        { code: "200", label: "Authenticated", type: "success" as const },
-        { code: "422", label: "Pending", type: "warning" as const },
-        { code: "403", label: "Failed / Timeout", type: "error" as const },
-        { code: "404", label: "Not Found", type: "error" as const },
-      ],
-    },
-    {
-      method: "POST",
-      path: "/BiometricGeoFenceResult",
-      name: "Geo-Fence Authentication",
-      description: "Similar to BiometricResultRequest but includes geofence and time window verification for location-based restrictions.",
-      requiresAuth: true,
-      code: `curl -X POST https://api.ivalt.com/BiometricGeoFenceResult \\
+    statusCodes: [
+      { code: "200", label: "Authenticated", type: "success" as const },
+      { code: "422", label: "Pending", type: "warning" as const },
+      { code: "403", label: "Failed / timeout", type: "error" as const },
+      { code: "404", label: "Not found", type: "error" as const },
+    ],
+  },
+  {
+    method: "POST",
+    path: "/BiometricGeoFenceResult",
+    name: "Geo-fence authentication",
+    description: "Verify biometric approval together with a latitude, longitude, and allowed radius.",
+    code: `curl -X POST https://api.ivalt.com/BiometricGeoFenceResult \\
   -H "Content-Type: application/json" \\
   -H "token: YOUR_IVALT_SECURITY_TOKEN" \\
   -H "x-api-key: YOUR_API_KEY" \\
@@ -127,7 +116,7 @@ export default function DocsPage() {
     "longitude": 76.7794,
     "radius_meters": 500
   }'`,
-      response: `{
+    response: `{
   "authenticated": true,
   "within_geofence": true,
   "user": {
@@ -135,262 +124,222 @@ export default function DocsPage() {
     "verified_at": "2025-05-07T10:30:00Z"
   }
 }`,
-      statusCodes: [
-        { code: "200", label: "Authenticated & Within Geofence", type: "success" as const },
-        { code: "422", label: "Pending", type: "warning" as const },
-        { code: "403", label: "Failed / Outside Geofence", type: "error" as const },
-        { code: "404", label: "Not Found", type: "error" as const },
-      ],
-    },
-  ];
+    statusCodes: [
+      { code: "200", label: "Authenticated & inside fence", type: "success" as const },
+      { code: "422", label: "Pending", type: "warning" as const },
+      { code: "403", label: "Failed / outside fence", type: "error" as const },
+      { code: "404", label: "Not found", type: "error" as const },
+    ],
+  },
+];
 
+const responseStates = [
+  { code: "200", title: "Authenticated", text: "Stop polling. The biometric match succeeded and your app can create a session.", icon: Check, tone: "bg-emerald-500/10 text-emerald-700" },
+  { code: "422", title: "Pending", text: "Keep polling every 2 seconds while the user reviews the request in the iVALT app.", icon: Timer, tone: "bg-amber-500/10 text-amber-700" },
+  { code: "403", title: "Failed / timeout", text: "Authentication failed, the token is missing, or the approval window has expired.", icon: AlertCircle, tone: "bg-destructive/10 text-destructive" },
+  { code: "404", title: "Not found", text: "The mobile number is not registered in iVALT, so no biometric challenge can start.", icon: AlertCircle, tone: "bg-destructive/10 text-destructive" },
+];
+
+export default function DocsPage() {
   return (
-    <div className="flex h-full">
-      {/* Sidebar navigation */}
-      <div className="w-64 border-r bg-white shrink-0 hidden lg:block">
-        <div className="p-6 border-b">
-          <h2 className="text-lg font-semibold">API Reference</h2>
-          <p className="text-sm text-muted-foreground mt-1">iVALT Biometric Auth</p>
-        </div>
-        <nav className="p-4 space-y-1">
-          {sections.map((section) => (
-            <button
-              key={section.id}
-              onClick={() => setActiveSection(section.id)}
-              className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                activeSection === section.id
-                  ? "bg-blue-50 text-blue-700"
-                  : "text-muted-foreground hover:bg-gray-100 hover:text-gray-900"
-              }`}
-            >
-              {section.label}
-            </button>
-          ))}
-          <Separator className="my-4" />
-          <div className="space-y-1">
-            <p className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Endpoints</p>
-            {endpoints.map((endpoint) => (
-              <a
-                key={endpoint.path}
-                href={`#${endpoint.path}`}
-                className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:bg-gray-100 hover:text-gray-900"
-              >
-                <Badge variant="outline" className="text-xs font-mono px-1.5 py-0.5">{endpoint.method}</Badge>
-                <span className="truncate">{endpoint.name}</span>
-              </a>
-            ))}
-          </div>
-        </nav>
-        <div className="p-4 border-t">
-          <a
-            href="https://documenter.getpostman.com/view/10533913/2sB2j4grRW"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-2 text-sm text-blue-600 hover:underline"
-          >
-            <ExternalLink className="w-4 h-4" />
-            View in Postman
-          </a>
-        </div>
-      </div>
-
-      {/* Main content */}
-      <div className="flex-1 overflow-y-auto">
-        <div className="max-w-3xl mx-auto p-8 space-y-12">
-          {/* Header */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-blue-600 flex items-center justify-center">
-                <svg className="w-7 h-7 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-                </svg>
+    <div className="mx-auto flex max-w-6xl flex-col gap-8">
+      <section className="grid gap-6 xl:grid-cols-[1.35fr_0.85fr]">
+        <Card className="relative overflow-hidden border-primary/10 bg-card shadow-sm shadow-foreground/5">
+          <div className="absolute inset-y-0 right-0 w-1/2 bg-[radial-gradient(circle_at_top_right,rgba(97,31,105,0.16),transparent_58%)]" />
+          <CardContent className="relative flex min-h-[330px] flex-col justify-between gap-10 p-6 sm:p-8 lg:p-10">
+            <div className="flex flex-col gap-6">
+              <div className="flex flex-wrap items-center gap-3">
+                <Badge variant="outline" className="border-primary/15 bg-primary/5 text-primary">
+                  <FileCode2 className="mr-1 size-3" />
+                  API reference v1.0
+                </Badge>
+                <span className="text-xs font-medium tracking-[0.08em] text-muted-foreground uppercase">Biometric auth contract</span>
               </div>
+              <div className="max-w-3xl">
+                <h2 className="text-4xl font-semibold tracking-[-0.03em] text-foreground sm:text-5xl lg:text-6xl">
+                  Integrate the iVALT flow without guessing states.
+                </h2>
+                <p className="mt-5 max-w-2xl text-base leading-7 text-muted-foreground sm:text-lg">
+                  Start with a biometric push, poll the result endpoint, and handle each terminal response with explicit application behavior.
+                </p>
+              </div>
+            </div>
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <Button asChild size="lg">
+                <a href="#endpoints">
+                  Review endpoints
+                  <ArrowRight data-icon="inline-end" />
+                </a>
+              </Button>
+              <Button asChild variant="outline" size="lg" className="bg-card/80">
+                <Link href="/dashboard/keys">
+                  Manage API keys
+                  <KeyRound data-icon="inline-end" />
+                </Link>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-primary/10 bg-card shadow-sm shadow-foreground/5">
+          <CardHeader className="p-6 pb-0">
+            <div className="flex items-start justify-between gap-4">
               <div>
-                <h1 className="text-3xl font-bold">iVALT API</h1>
-                <p className="text-muted-foreground">Biometric Authentication API v1.0</p>
+                <CardTitle className="text-xl tracking-[-0.02em]">Base URL</CardTitle>
+                <CardDescription>Use the same production host for all biometric endpoints.</CardDescription>
+              </div>
+              <div className="flex size-11 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                <RadioTower className="size-5" />
               </div>
             </div>
-            <p className="text-lg text-muted-foreground leading-relaxed">
-              The iVALT API provides passwordless biometric authentication that ties identity directly to the human — not the device. Integrate our API to add secure, frictionless authentication to your applications.
-            </p>
-            <div className="flex items-center gap-4 pt-4">
-              <div className="flex items-center gap-2 text-sm text-green-600">
-                <Check className="w-4 h-4" />
-                <span>REST API</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm text-green-600">
-                <Check className="w-4 h-4" />
-                <span>JSON Responses</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm text-green-600">
-                <Check className="w-4 h-4" />
-                <span>Webhooks Supported</span>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-5 p-6">
+            <div className="rounded-2xl border border-border/80 bg-background/70 p-4">
+              <p className="mb-2 text-xs font-medium tracking-[0.08em] text-muted-foreground uppercase">Endpoint root</p>
+              <div className="flex items-center gap-3">
+                <code className="min-w-0 flex-1 break-all text-lg font-semibold tracking-[-0.02em] text-primary">https://api.ivalt.com</code>
+                <Button variant="ghost" size="icon" onClick={() => copyToClipboard("https://api.ivalt.com")}>
+                  <Copy />
+                </Button>
               </div>
             </div>
-          </div>
-
-          <Separator />
-
-          {/* Base URL */}
-          <div className="space-y-4">
-            <h2 className="text-xl font-semibold" id="introduction">Introduction</h2>
-            <Card className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium mb-1">Base URL</p>
-                  <code className="text-lg font-mono text-blue-600">https://api.ivalt.com</code>
+            <div className="grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
+              {[
+                "REST API",
+                "JSON responses",
+                "Webhook-ready",
+              ].map((item) => (
+                <div key={item} className="flex items-center gap-2 rounded-2xl border border-border/80 bg-background/70 px-3 py-2 text-sm font-medium">
+                  <Check className="size-4 text-emerald-700" />
+                  {item}
                 </div>
-                <button
-                  onClick={() => copyToClipboard("https://api.ivalt.com")}
-                  className="p-2 rounded-lg hover:bg-gray-100 text-muted-foreground hover:text-gray-700"
-                >
-                  <Copy className="w-5 h-5" />
-                </button>
-              </div>
-            </Card>
-          </div>
-
-          <Separator />
-
-          {/* Authentication */}
-          <div className="space-y-4">
-            <h2 className="text-xl font-semibold" id="authentication">Authentication</h2>
-            <p className="text-muted-foreground">
-              The iVALT API uses API keys to authenticate requests. You can view and manage your API keys in the <Link href="/dashboard/keys" className="text-blue-600 hover:underline">Dashboard</Link>.
-            </p>
-            <Card className="p-4 space-y-3">
-              <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600 font-mono text-sm font-bold shrink-0">1</div>
-                <div>
-                  <p className="font-medium">Include your API key</p>
-                  <code className="text-sm text-muted-foreground">x-api-key: YOUR_API_KEY</code>
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600 font-mono text-sm font-bold shrink-0">2</div>
-                <div>
-                  <p className="font-medium">Include your security token</p>
-                  <code className="text-sm text-muted-foreground">token: YOUR_IVALT_SECURITY_TOKEN</code>
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600 font-mono text-sm font-bold shrink-0">3</div>
-                <div>
-                  <p className="font-medium">Set Content-Type header</p>
-                  <code className="text-sm text-muted-foreground">Content-Type: application/json</code>
-                </div>
-              </div>
-            </Card>
-          </div>
-
-          <Separator />
-
-          {/* Endpoints */}
-          <div className="space-y-6">
-            <h2 className="text-xl font-semibold" id="endpoints">Endpoints</h2>
-            
-            {endpoints.map((endpoint) => (
-              <Card key={endpoint.path} className="overflow-hidden" id={endpoint.path.replace("/", "")}>
-                <div className="p-6 border-b bg-gray-50">
-                  <div className="flex items-center gap-3 mb-3">
-                    <Badge variant="default" className="bg-blue-600">{endpoint.method}</Badge>
-                    <code className="text-lg font-mono">{endpoint.path}</code>
-                  </div>
-                  <h3 className="text-lg font-semibold">{endpoint.name}</h3>
-                  <p className="text-sm text-muted-foreground mt-1">{endpoint.description}</p>
-                </div>
-                
-                <div className="p-6 space-y-6">
-                  {/* Request */}
-                  <div className="space-y-3">
-                    <h4 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Request</h4>
-                    <CodeBlock code={endpoint.code} language="bash" />
-                  </div>
-
-                  {/* Response */}
-                  <div className="space-y-3">
-                    <h4 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Response</h4>
-                    <CodeBlock code={endpoint.response} language="json" />
-                  </div>
-
-                  {/* Status Codes */}
-                  <div className="space-y-3">
-                    <h4 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Status Codes</h4>
-                    <div className="flex flex-wrap gap-2">
-                      {endpoint.statusCodes.map((sc) => (
-                        <StatusBadge key={sc.code} code={sc.code} label={sc.label} type={sc.type} />
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </Card>
-            ))}
-          </div>
-
-          <Separator />
-
-          {/* Error Codes */}
-          <div className="space-y-4">
-            <h2 className="text-xl font-semibold" id="errors">Error Codes</h2>
-            <div className="grid gap-3">
-              <Card className="p-4 flex items-start gap-4">
-                <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center shrink-0">
-                  <Check className="w-5 h-5 text-green-600" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="font-mono">200</Badge>
-                    <span className="font-semibold">Authenticated</span>
-                  </div>
-                  <p className="text-sm text-muted-foreground mt-1">User successfully authenticated via biometrics. Stop polling.</p>
-                </div>
-              </Card>
-              <Card className="p-4 flex items-start gap-4">
-                <div className="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center shrink-0">
-                  <AlertCircle className="w-5 h-5 text-yellow-600" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="font-mono">422</Badge>
-                    <span className="font-semibold">Pending</span>
-                  </div>
-                  <p className="text-sm text-muted-foreground mt-1">User has not yet approved the authentication. Continue polling every 2 seconds.</p>
-                </div>
-              </Card>
-              <Card className="p-4 flex items-start gap-4">
-                <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center shrink-0">
-                  <AlertCircle className="w-5 h-5 text-red-600" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="font-mono">403</Badge>
-                    <span className="font-semibold">Failed / Timeout</span>
-                  </div>
-                  <p className="text-sm text-muted-foreground mt-1">Authentication failed, security token missing, or 5-minute window exceeded.</p>
-                </div>
-              </Card>
-              <Card className="p-4 flex items-start gap-4">
-                <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center shrink-0">
-                  <AlertCircle className="w-5 h-5 text-red-600" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="font-mono">404</Badge>
-                    <span className="font-semibold">Not Found</span>
-                  </div>
-                  <p className="text-sm text-muted-foreground mt-1">The mobile number is not registered in the iVALT system.</p>
-                </div>
-              </Card>
+              ))}
             </div>
-          </div>
+          </CardContent>
+        </Card>
+      </section>
 
-          {/* Footer */}
-          <div className="pt-8 border-t text-center">
-            <p className="text-sm text-muted-foreground">
-              &copy; 2025 iVALT Inc. All rights reserved.
-            </p>
+      <Card className="border-primary/10 bg-card shadow-sm shadow-foreground/5" id="authentication">
+        <CardHeader className="p-6 pb-0">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <CardTitle className="text-2xl tracking-[-0.025em]">Authentication headers</CardTitle>
+              <CardDescription>Send both credentials with every protected request.</CardDescription>
+            </div>
+            <Badge variant="outline" className="w-fit bg-background">
+              <ShieldCheck className="mr-1 size-3" />
+              Required for all endpoints
+            </Badge>
           </div>
+        </CardHeader>
+        <CardContent className="grid gap-4 p-6 lg:grid-cols-3">
+          {[
+            { step: "01", title: "API key", value: "x-api-key: YOUR_API_KEY" },
+            { step: "02", title: "Security token", value: "token: YOUR_IVALT_SECURITY_TOKEN" },
+            { step: "03", title: "Content type", value: "Content-Type: application/json" },
+          ].map((item) => (
+            <div key={item.step} className="rounded-2xl border border-border/80 bg-background/70 p-5">
+              <div className="mb-5 flex items-center justify-between gap-4">
+                <div className="flex size-9 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">{item.step}</div>
+                <KeyRound className="size-5 text-muted-foreground" />
+              </div>
+              <p className="font-semibold tracking-[-0.01em]">{item.title}</p>
+              <code className="mt-2 block break-all text-sm text-muted-foreground">{item.value}</code>
+            </div>
+          ))}
+        </CardContent>
+      </Card>
+
+      <section className="flex flex-col gap-6" id="endpoints">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h2 className="text-2xl font-semibold tracking-[-0.025em]">Endpoints</h2>
+            <p className="text-sm text-muted-foreground">The production flow is short: request, poll, then trust the terminal status.</p>
+          </div>
+          <Badge variant="secondary" className="w-fit">3 documented calls</Badge>
         </div>
+
+        {endpoints.map((endpoint, index) => (
+          <Card key={endpoint.path} className="overflow-hidden border-primary/10 bg-card shadow-sm shadow-foreground/5" id={endpoint.path.replace("/", "")}>
+            <div className="border-b border-border/80 bg-muted/35 p-6">
+              <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                <div className="flex flex-col gap-3">
+                  <div className="flex flex-wrap items-center gap-3">
+                    <Badge className="bg-primary text-primary-foreground">{endpoint.method}</Badge>
+                    <code className="rounded-full border border-border/80 bg-background px-3 py-1 font-mono text-sm">{endpoint.path}</code>
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-semibold tracking-[-0.02em]">{endpoint.name}</h3>
+                    <p className="mt-1 max-w-3xl text-sm leading-6 text-muted-foreground">{endpoint.description}</p>
+                  </div>
+                </div>
+                <div className="flex size-11 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                  <span className="text-sm font-semibold">0{index + 1}</span>
+                </div>
+              </div>
+            </div>
+            <CardContent className="flex flex-col gap-6 p-6">
+              <div className="grid gap-6 xl:grid-cols-2">
+                <div className="flex flex-col gap-3">
+                  <h4 className="text-xs font-semibold tracking-[0.12em] text-muted-foreground uppercase">Request</h4>
+                  <CodeBlock code={endpoint.code} language="bash" />
+                </div>
+                <div className="flex flex-col gap-3">
+                  <h4 className="text-xs font-semibold tracking-[0.12em] text-muted-foreground uppercase">Response</h4>
+                  <CodeBlock code={endpoint.response} language="json" />
+                </div>
+              </div>
+              <Separator />
+              <div className="flex flex-col gap-3">
+                <h4 className="text-xs font-semibold tracking-[0.12em] text-muted-foreground uppercase">Status codes</h4>
+                <div className="flex flex-wrap gap-2">
+                  {endpoint.statusCodes.map((sc) => (
+                    <StatusBadge key={sc.code} code={sc.code} label={sc.label} type={sc.type} />
+                  ))}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </section>
+
+      <Card className="border-primary/10 bg-card shadow-sm shadow-foreground/5" id="errors">
+        <CardHeader className="p-6 pb-0">
+          <div className="flex items-center gap-3">
+            <div className="flex size-11 items-center justify-center rounded-2xl bg-accent text-accent-foreground">
+              <Waypoints className="size-5" />
+            </div>
+            <div>
+              <CardTitle className="text-2xl tracking-[-0.025em]">Response handling</CardTitle>
+              <CardDescription>Map each status to a clear product state.</CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="grid gap-3 p-6 md:grid-cols-2">
+          {responseStates.map((state) => {
+            const Icon = state.icon;
+            return (
+              <div key={state.code} className="rounded-2xl border border-border/80 bg-background/70 p-4">
+                <div className="flex items-start gap-4">
+                  <div className={cn("flex size-10 shrink-0 items-center justify-center rounded-2xl", state.tone)}>
+                    <Icon className="size-5" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Badge variant="outline" className="bg-card font-mono">{state.code}</Badge>
+                      <span className="font-semibold">{state.title}</span>
+                    </div>
+                    <p className="mt-2 text-sm leading-6 text-muted-foreground">{state.text}</p>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </CardContent>
+      </Card>
+
+      <div className="pb-4 text-center text-xs text-muted-foreground">
+        © 2025 iVALT Inc. All rights reserved.
       </div>
     </div>
   );

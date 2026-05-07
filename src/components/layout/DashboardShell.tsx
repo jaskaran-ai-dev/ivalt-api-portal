@@ -81,10 +81,10 @@ function SidebarContentLayout({ children, phoneNumber, demoMode }: DashboardShel
 
   return (
     <>
-      <Sidebar className="border-r" collapsible="icon">
-        <SidebarHeader className="border-b border-sidebar-border">
+      <Sidebar className="border-r border-sidebar-border/80 bg-sidebar" collapsible="icon">
+        <SidebarHeader className="border-b border-sidebar-border/80">
           <div className="flex items-center gap-3 px-3 py-3">
-            <div className="w-9 h-9 rounded-lg bg-blue-600 flex items-center justify-center shrink-0">
+            <div className="size-9 rounded-2xl bg-primary flex items-center justify-center shrink-0 shadow-sm shadow-primary/20">
               <ShieldCheck className="w-5 h-5 text-white" />
             </div>
             <div className="min-w-0 flex-1 group-data-[state=collapsed]:hidden">
@@ -98,7 +98,7 @@ function SidebarContentLayout({ children, phoneNumber, demoMode }: DashboardShel
           {/* Demo badge - only show when expanded */}
           {demoMode && (
             <div className="mb-2 px-2 group-data-[state=collapsed]:hidden">
-              <div className="flex items-center gap-2 px-3 py-2 rounded-md bg-blue-600/20 border border-blue-500/30 text-blue-300 text-xs font-medium">
+              <div className="flex items-center gap-2 rounded-2xl border border-primary/15 bg-primary/10 px-3 py-2 text-xs font-medium text-primary">
                 <FlaskConical className="w-4 h-4 shrink-0" />
                 <span className="truncate">Demo Mode Active</span>
               </div>
@@ -126,7 +126,7 @@ function SidebarContentLayout({ children, phoneNumber, demoMode }: DashboardShel
                           <Icon className="w-5 h-5" />
                           <span className="group-data-[state=collapsed]:hidden">{item.label}</span>
                           {isActive && (
-                            <div className="ml-auto w-1.5 h-1.5 rounded-full bg-blue-500 group-data-[state=collapsed]:hidden" />
+                            <div className="ml-auto size-1.5 rounded-full bg-primary group-data-[state=collapsed]:hidden" />
                           )}
                         </Link>
                       </SidebarMenuButton>
@@ -191,8 +191,8 @@ function SidebarContentLayout({ children, phoneNumber, demoMode }: DashboardShel
         <SidebarFooter className="border-t border-sidebar-border px-2 py-2">
           {/* User section */}
           <div className="mb-2 px-2 group-data-[state=collapsed]:hidden">
-            <div className="flex items-center gap-3 p-2.5 rounded-md bg-sidebar-accent">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-xs font-bold text-white shrink-0">
+            <div className="flex items-center gap-3 rounded-2xl border border-sidebar-border/80 bg-sidebar-accent/80 p-2.5">
+              <div className="size-8 rounded-2xl bg-primary flex items-center justify-center text-xs font-bold text-primary-foreground shrink-0">
                 {phoneNumber.slice(-2) || "DM"}
               </div>
               <div className="min-w-0 flex-1">
@@ -222,17 +222,6 @@ function SidebarContentLayout({ children, phoneNumber, demoMode }: DashboardShel
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
-
-          {/* Collapse toggle button */}
-          <div className="mt-2 px-2 group-data-[state=collapsed]:hidden">
-            <SidebarMenuButton
-              tooltip="Collapse sidebar"
-              className="w-full justify-start"
-            >
-              <Minus className="w-4 h-4" />
-              <span>Collapse sidebar</span>
-            </SidebarMenuButton>
-          </div>
         </SidebarFooter>
 
         {/* Rail for expand on hover */}
@@ -242,18 +231,18 @@ function SidebarContentLayout({ children, phoneNumber, demoMode }: DashboardShel
       {/* Main content area */}
       <SidebarInset>
         {/* Top bar */}
-        <header className="flex items-center gap-4 px-6 py-4 bg-white border-b border-gray-200 shrink-0">
+        <header className="flex items-center gap-4 border-b border-border/80 bg-card/90 px-6 py-4 shadow-sm shadow-foreground/5 backdrop-blur shrink-0">
           <div className="flex items-center gap-2">
             <SidebarTrigger />
-            <span className="text-xs text-gray-400 hidden md:inline">⌘B to toggle</span>
+            <span className="hidden text-xs text-muted-foreground md:inline">⌘B to toggle</span>
           </div>
           <div className="flex-1 min-w-0">
-            <h1 className="font-semibold text-lg text-gray-900 truncate">
+            <h1 className="truncate text-lg font-semibold tracking-[-0.01em] text-foreground">
               {activeItem?.label || "Dashboard"}
             </h1>
           </div>
           {demoMode && (
-            <span className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full bg-blue-100 text-blue-700">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/15 bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary">
               <FlaskConical className="w-4 h-4" />
               Demo
             </span>
@@ -262,14 +251,14 @@ function SidebarContentLayout({ children, phoneNumber, demoMode }: DashboardShel
             href="https://documenter.getpostman.com/view/10533913/2sB2j4grRW"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-sm font-medium text-blue-600 hover:underline hidden sm:inline"
+            className="hidden text-sm font-medium text-primary underline-offset-4 hover:underline sm:inline"
           >
             API Ref ↗
           </a>
         </header>
 
         {/* Content */}
-        <main className="flex-1 overflow-y-auto p-6 lg:p-8 bg-gray-100">
+        <main className="flex-1 overflow-y-auto bg-[radial-gradient(circle_at_top_right,rgba(97,31,105,0.06),transparent_32%),var(--background)] p-6 lg:p-8">
           {children}
         </main>
       </SidebarInset>
