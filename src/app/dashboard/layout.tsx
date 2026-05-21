@@ -15,6 +15,11 @@ export default async function DashboardLayout({
     redirect("/login");
   }
 
+  // Check if user has approved access (skip in demo mode)
+  if (!DEMO_MODE && session.accessStatus !== "approved") {
+    redirect("/access/status");
+  }
+
   return (
     <DashboardShell phoneNumber={session.phoneNumber || ""} demoMode={DEMO_MODE}>
       {children}
