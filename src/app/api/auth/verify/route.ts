@@ -3,7 +3,7 @@ import { DEMO_MODE, DEMO_SESSION, DEMO_USER } from "@/lib/demo";
 import { getBiometricResult } from "@/lib/ivalt";
 import { getSession } from "@/lib/session";
 import { db } from "@/db";
-import { users } from "@/db/schema";
+import { users, accessRequests } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
 export async function POST(req: NextRequest) {
@@ -35,23 +35,39 @@ export async function POST(req: NextRequest) {
       if (!user) {
         const [newUser] = await db
           .insert(users)
-          .values({ phoneNumber: cleanPhone })
+          .values({ phoneNumber: cleanPhone, status: "pending" })
           .returning();
         user = newUser;
       } else {
         await db
           .update(users)
-          .set({ lastLoginAt: new Date() })
+          .set({ lastLoginAt: new Date(), updatedAt: new Date() })
           .where(eq(users.id, user.id));
+      }
+
+      // If user is not yet approved, create an access request if one doesn't exist
+      if (user.status === "pending") {
+        const existingRequest = await db.query.accessRequests.findFirst({
+          where: (ar) => ar.userId === user.id,
+        });
+
+        if (!existingRequest) {
+          await db.insert(accessRequests).values({
+            userId: user.id,
+            useCase: "",
+            requestedAt: new Date(),
+          });
+        }
       }
 
       const session = await getSession();
       session.userId = user.id;
       session.phoneNumber = cleanPhone;
       session.isLoggedIn = true;
+      session.accessStatus = user.status;
       await session.save!();
 
-      return NextResponse.json({ status: "authenticated" });
+      return NextResponse.json({ status: "authenticated", accessStatus: user.status });
     }
 
     return NextResponse.json({ status: result.status, statusCode: result.statusCode });
