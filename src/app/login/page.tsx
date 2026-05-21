@@ -59,7 +59,10 @@ export default function LoginPage() {
         if (data.status === "authenticated") {
           clearInterval(interval);
           setStep("success");
-          setTimeout(() => router.push("/dashboard"), 1500);
+          // Check if user needs to submit access request
+          const accessStatus = data.accessStatus || "pending";
+          const redirectPath = accessStatus === "approved" ? "/dashboard" : "/access/request";
+          setTimeout(() => router.push(redirectPath), 1500);
         } else if (data.status === "failed" || data.status === "not_found") {
           clearInterval(interval);
           toast.error("Authentication failed. Please try again.");
