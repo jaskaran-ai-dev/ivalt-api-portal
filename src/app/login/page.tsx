@@ -231,7 +231,7 @@ export default function LoginPage() {
             ].map((item) => (
               <div
                 key={item.label}
-                className="rounded-2xl border border-border/80 bg-card/70 p-4 shadow-sm shadow-foreground/5 backdrop-blur"
+                className="rounded-2xl border border-border/80 bg-card/70 p-4 shadow-sm shadow-black/5 dark:shadow-white/5 backdrop-blur"
               >
                 <p className="text-sm font-semibold tracking-[-0.01em]">
                   {item.label}
@@ -255,7 +255,7 @@ export default function LoginPage() {
             {DEMO_MODE && <Badge variant="secondary">Demo</Badge>}
           </div>
 
-          <Card className="border-primary/10 bg-card/95 shadow-xl shadow-foreground/10 backdrop-blur">
+          <Card className="border-primary/10 bg-card/95 shadow-xl shadow-black/10 dark:shadow-white/10 backdrop-blur">
             <CardHeader className="p-6 pb-0">
               <div className="mb-5 flex size-12 items-center justify-center rounded-3xl bg-primary/10 text-primary">
                 {step === "waiting" ? (
@@ -292,7 +292,7 @@ export default function LoginPage() {
                 <div className="flex flex-col gap-5">
                   <div className="flex flex-col gap-2">
                     <Label htmlFor="phone">Phone number</Label>
-                    <div className="relative flex overflow-visible rounded-2xl border border-input bg-background shadow-sm shadow-foreground/5 focus-within:ring-2 focus-within:ring-ring/30">
+                    <div className="relative flex overflow-visible rounded-2xl border border-input bg-background shadow-sm shadow-black/5 dark:shadow-white/5 focus-within:ring-2 focus-within:ring-ring/30">
                       <button
                         type="button"
                         onClick={() =>
@@ -311,7 +311,7 @@ export default function LoginPage() {
                       </button>
 
                       {showDropdown && !DEMO_MODE && (
-                        <div className="absolute left-0 top-full mt-2 max-h-64 w-64 overflow-auto rounded-2xl border border-border bg-popover p-1 shadow-xl shadow-foreground/10">
+                        <div className="absolute left-0 top-full mt-2 max-h-64 w-64 overflow-auto rounded-2xl border border-border bg-popover p-1 shadow-xl shadow-black/10 dark:shadow-white/10">
                           {COUNTRY_CODES.map((c, i) => (
                             <button
                               key={`${c.country}-${i}`}
