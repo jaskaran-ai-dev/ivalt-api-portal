@@ -3,7 +3,8 @@ import { getSession } from "@/lib/session";
 import { db } from "@/db";
 import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import { DEMO_MODE, DEMO_USER } from "@/lib/demo";
+import { DEMO_MODE, DEMO_USERS } from "@/lib/demo";
+const DEMO_USER = DEMO_USERS[0];
 
 export async function POST(req: NextRequest) {
   try {

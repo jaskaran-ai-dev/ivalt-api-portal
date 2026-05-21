@@ -28,7 +28,7 @@ export async function GET(req: NextRequest) {
     });
 
     const request = await db.query.accessRequests.findFirst({
-      where: (ar) => ar.userId === userId,
+      where: (ar) => eq(ar.userId, userId),
     });
 
     // Return the user's status - if no user record, they need to complete access request

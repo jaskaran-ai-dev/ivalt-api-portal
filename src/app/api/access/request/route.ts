@@ -3,7 +3,7 @@ import { DEMO_MODE } from "@/lib/demo";
 import { getSession } from "@/lib/session";
 import { db } from "@/db";
 import { users, accessRequests } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, isNull } from "drizzle-orm";
 
 export async function POST(req: NextRequest) {
   try {
@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
 
     // Check if user already has a pending request
     const existingRequest = await db.query.accessRequests.findFirst({
-      where: (ar) => ar.userId === userId,
+      where: (ar) => eq(ar.userId, userId),
     });
 
     if (existingRequest) {
@@ -73,12 +73,19 @@ export async function GET(req: NextRequest) {
     const status = searchParams.get("status") || "pending";
 
     // Get all access requests with user info
-    const requests = await db.query.accessRequests.findMany({
-      where: (ar) => 
-        status === "all" || 
-        (status === "pending" && !ar.approvedAt) ||
-        (status === "approved" && ar.approvedAt),
-    });
+    let requests;
+    
+    if (status === "all") {
+      requests = await db.query.accessRequests.findMany({});
+    } else if (status === "pending") {
+      requests = await db.query.accessRequests.findMany({
+        where: isNull(accessRequests.approvedAt),
+      });
+    } else {
+      requests = await db.query.accessRequests.findMany({
+        where: (ar) => ar.approvedAt !== null,
+      });
+    }
 
     // For each request, get user info
     const requestsWithUsers = await Promise.all(
