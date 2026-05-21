@@ -5,6 +5,7 @@ A full-stack Next.js 15 developer portal for managing iVALT biometric API keys, 
 ## Features
 
 - **Biometric Login** — iVALT passwordless authentication via mobile number + biometric push notification
+- **Access Control** — Admin-approved access requests before API key management
 - **API Key Management** — Create, enable/disable, and delete AWS API Gateway keys (up to 4 per user)
 - **API Documentation** — Interactive in-app docs for the iVALT biometric auth API
 - **Design System** — Slack-inspired purple/white design with Montserrat + Open Sans typography
@@ -27,6 +28,9 @@ A full-stack Next.js 15 developer portal for managing iVALT biometric API keys, 
 src/
 ├── app/
 │   ├── login/                  # Biometric login page
+│   ├── access/
+│   │   ├── request/page.tsx    # Access request form (new users)
+│   │   └── status/page.tsx     # Pending access status page
 │   ├── dashboard/
 │   │   ├── page.tsx            # Dashboard overview
 │   │   ├── keys/page.tsx       # API key management
@@ -36,20 +40,28 @@ src/
 │       │   ├── request/        # POST - initiate biometric auth
 │       │   ├── verify/         # POST - poll result + create session
 │       │   └── logout/         # POST - destroy session
+│       ├── access/
+│       │   ├── request/route.ts   # POST - submit access request, GET - list requests (admin)
+│       │   ├── approve/route.ts   # POST - approve/reject access request
+│       │   └── me/route.ts       # GET - current user's access status
 │       └── keys/
 │           ├── route.ts         # GET - list keys
 │           ├── create/          # POST - create key
 │           └── [id]/            # DELETE + PATCH - manage key
 ├── components/
-│   └── layout/
-│       └── DashboardShell.tsx  # Sidebar + header layout
+│   ├── layout/
+│   │   └── DashboardShell.tsx  # Sidebar + header layout
+│   └── ui/
+│       └── ...                 # Shadcn-compatible components
 ├── db/
 │   ├── index.ts                # Drizzle connection
-│   └── schema.ts               # Table definitions
+│   ├── schema.ts               # Table definitions
+│   └── migrations/             # Migration files
 └── lib/
     ├── session.ts              # iron-session config
     ├── ivalt.ts                # iVALT API client
-    └── aws-gateway.ts          # AWS API Gateway client
+    ├── aws-gateway.ts          # AWS API Gateway client
+    └── demo.ts                 # Demo mode fixtures
 ```
 
 ## Setup
@@ -139,7 +151,19 @@ Open [http://localhost:3000](http://localhost:3000)
 3. iVALT sends push notification to user's phone
 4. Client polls `POST /api/auth/verify` every 2 seconds
 5. Server polls iVALT `BiometricResultRequest`
-6. On status 200 (authenticated), session is created and user is redirected to dashboard
+6. On status 200 (authenticated), session is created with `accessStatus: "pending"`
+7. User is redirected to `/access/request` to submit use case
+8. Admin reviews request and approves/denies via admin panel
+9. On approval, user status changes to `"approved"` and can access dashboard
+
+## New User Access Flow
+
+```
+Login → Biometric Auth → Access Request Form → Admin Review → Approved → Dashboard
+```
+
+Users must describe their use case before getting API access. The admin team receives notification
+and can approve/deny requests. Approved users get full dashboard access.
 
 ## API Key Limits
 
