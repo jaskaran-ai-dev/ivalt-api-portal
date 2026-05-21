@@ -37,12 +37,22 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: result.message || "Authentication request failed" }, { status: 400 });
     }
 
+    // Check if user exists and is already approved
+    const existingUser = await db.query.users.findFirst({
+      where: (u) => u.phoneNumber === cleanPhone,
+    });
+
+    // If user exists and is approved, no need to create access request again
+    if (existingUser && existingUser.status === "approved") {
+      return NextResponse.json({ success: true, message: "Authentication request sent to your iVALT app" });
+    }
+
     await db
       .insert(users)
-      .values({ phoneNumber: cleanPhone })
+      .values({ phoneNumber: cleanPhone, status: "pending" })
       .onConflictDoUpdate({
         target: users.phoneNumber,
-        set: { updatedAt: new Date() },
+        set: { updatedAt: new Date(), status: "pending" },
       });
 
     return NextResponse.json({ success: true, message: "Authentication request sent to your iVALT app" });
