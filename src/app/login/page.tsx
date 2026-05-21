@@ -17,13 +17,6 @@ import {
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 
 const DEMO_MODE = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
@@ -185,45 +178,39 @@ export default function LoginPage() {
   }, [fullNumber, handleDemoLogin, phoneNumber, startPolling]);
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-background px-4 py-8">
+    <div className="relative min-h-screen overflow-hidden bg-background">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_12%,rgba(97,31,105,0.13),transparent_32%),radial-gradient(circle_at_86%_18%,rgba(53,91,146,0.12),transparent_30%),linear-gradient(135deg,rgba(97,31,105,0.06),transparent_42%)]" />
       <div className="absolute inset-x-0 bottom-0 h-1/2 bg-[linear-gradient(to_top,rgba(97,31,105,0.05),transparent)]" />
 
-      <main className="relative mx-auto grid min-h-[calc(100vh-4rem)] w-full max-w-6xl items-center gap-10 lg:grid-cols-[1.08fr_0.82fr]">
-        <section className="hidden flex-col gap-8 lg:flex">
+      <main className="relative mx-auto flex min-h-screen max-w-6xl flex-col lg:flex-row">
+        {/* Left — Branding */}
+        <section className="flex flex-col justify-center gap-8 px-6 py-12 lg:flex-1 lg:px-12 lg:py-0">
           <div className="flex items-center gap-3">
-            <div className="flex size-12 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-sm shadow-primary/20">
-              <ShieldCheck className="size-6" />
-            </div>
+            <img src="/logo.webp" alt="iVALT" className="h-8 w-auto" />
             <div>
-              <p className="text-2xl font-semibold tracking-[-0.03em]">iVALT</p>
-              <p className="text-sm text-muted-foreground">Developer Portal</p>
+              <p className="text-sm font-semibold tracking-[-0.03em]">
+                APIs Access
+              </p>
             </div>
             {DEMO_MODE && (
-              <Badge variant="secondary" className="ml-2">
+              <Badge variant="secondary" className="ml-1">
                 Demo
               </Badge>
             )}
           </div>
 
-          <div className="max-w-2xl">
-            <Badge
-              variant="outline"
-              className="mb-5 w-fit border-primary/15 bg-primary/5 text-primary"
-            >
-              <Lock className="mr-1 size-3" />
-              Passwordless biometric access
-            </Badge>
-            <h1 className="text-3xl font-semibold tracking-[-0.04em] text-foreground xl:text-5xl ">
-              Sign in with a verified human signal.
+          <div className="max-w-xl">
+            <h1 className="text-3xl font-semibold tracking-[-0.04em] text-foreground xl:text-4xl">
+              Sign in with a verified{" "}
+              <span className="text-primary">human signal</span>.
             </h1>
-            <p className="mt-6 max-w-xl text-lg leading-8 text-muted-foreground">
+            <p className="mt-4 text-base leading-7 text-muted-foreground">
               Access API keys and integration docs through the same biometric
               trust layer your customers will use in production.
             </p>
           </div>
 
-          <div className="grid max-w-2xl gap-3 sm:grid-cols-3">
+          <div className="grid gap-3 sm:grid-cols-3">
             {[
               { label: "No passwords", text: "Mobile biometric approval" },
               { label: "2s polling", text: "Explicit pending state" },
@@ -231,12 +218,12 @@ export default function LoginPage() {
             ].map((item) => (
               <div
                 key={item.label}
-                className="rounded-2xl border border-border/80 bg-card/70 p-4 shadow-sm shadow-black/5 dark:shadow-white/5 backdrop-blur"
+                className="rounded-xl border border-border/60 bg-card/50 p-3.5"
               >
                 <p className="text-sm font-semibold tracking-[-0.01em]">
                   {item.label}
                 </p>
-                <p className="mt-2 text-xs leading-5 text-muted-foreground">
+                <p className="mt-1 text-xs leading-5 text-muted-foreground">
                   {item.text}
                 </p>
               </div>
@@ -244,61 +231,61 @@ export default function LoginPage() {
           </div>
         </section>
 
-        <section className="mx-auto flex w-full max-w-md flex-col gap-6">
+        {/* Right — Form (no card, no shadow) */}
+        <section className="flex flex-col justify-center px-6 pb-16 pt-8 lg:flex-1 lg:px-16 lg:py-0">
           <div className="flex items-center justify-center gap-3 lg:hidden">
-            <div className="flex size-11 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-sm shadow-primary/20">
-              <ShieldCheck className="size-6" />
-            </div>
-            <span className="text-2xl font-semibold tracking-[-0.03em]">
+            <img src="/logo.webp" alt="iVALT" className="h-7 w-auto" />
+            <span className="text-lg font-semibold tracking-[-0.03em]">
               iVALT
             </span>
             {DEMO_MODE && <Badge variant="secondary">Demo</Badge>}
           </div>
 
-          <Card className="border-primary/10 bg-card/95 shadow-xl shadow-black/10 dark:shadow-white/10 backdrop-blur">
-            <CardHeader className="p-6 pb-0">
-              <div className="mb-5 flex size-12 items-center justify-center rounded-3xl bg-primary/10 text-primary">
-                {step === "waiting" ? (
-                  <Smartphone className="size-6" />
-                ) : step === "success" ? (
-                  <CheckCircle2 className="size-6" />
-                ) : (
-                  <ShieldCheck className="size-6" />
-                )}
-              </div>
-              <CardTitle className="text-2xl tracking-[-0.025em]">
-                {step === "waiting"
-                  ? "Approve on your phone"
-                  : step === "success"
-                    ? DEMO_MODE
-                      ? "Demo access granted"
-                      : "Authenticated"
-                    : DEMO_MODE
-                      ? "Demo access"
-                      : "Sign in"}
-              </CardTitle>
-              <CardDescription>
-                {step === "waiting"
-                  ? `Request sent to ${fullNumber}`
-                  : step === "success"
-                    ? "Redirecting to your developer portal"
-                    : DEMO_MODE
-                      ? "Explore the portal with safe demo data."
-                      : "Enter your mobile number to receive an iVALT approval request."}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="p-6">
+          <div className="mx-auto w-full max-w-sm">
+            {/* Title */}
+            <h2 className="text-2xl font-semibold tracking-[-0.025em]">
+              {step === "waiting"
+                ? "Approve on your phone"
+                : step === "success"
+                  ? DEMO_MODE
+                    ? "Demo access granted"
+                    : "Authenticated"
+                  : DEMO_MODE
+                    ? "Demo access"
+                    : "Welcome back"}
+            </h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {step === "waiting"
+                ? `Request sent to ${fullNumber}`
+                : step === "success"
+                  ? "Redirecting to your developer portal"
+                  : DEMO_MODE
+                    ? "Explore the portal with safe demo data."
+                    : "Sign in to continue to the developer portal."}
+            </p>
+
+            <div className="mt-8">
               {step === "phone" && (
                 <div className="flex flex-col gap-5">
+                  {DEMO_MODE && (
+                    <div className="flex items-center gap-3 rounded-xl border border-primary/10 bg-primary/5 p-3 text-sm text-muted-foreground">
+                      <FlaskConical className="size-4 shrink-0 text-primary" />
+                      Demo mode is active — no live biometric request will be
+                      sent.
+                    </div>
+                  )}
+
                   <div className="flex flex-col gap-2">
-                    <Label htmlFor="phone">Phone number</Label>
-                    <div className="relative flex overflow-visible rounded-2xl border border-input bg-background shadow-sm shadow-black/5 dark:shadow-white/5 focus-within:ring-2 focus-within:ring-ring/30">
+                    <Label htmlFor="phone" className="text-sm font-medium">
+                      Phone number
+                    </Label>
+                    <div className="relative flex overflow-visible rounded-xl border border-input bg-background focus-within:ring-2 focus-within:ring-ring/30">
                       <button
                         type="button"
                         onClick={() =>
                           !DEMO_MODE && setShowDropdown(!showDropdown)
                         }
-                        className="flex items-center gap-2 rounded-l-2xl border-r border-input px-3 py-3 text-sm transition-colors hover:bg-muted disabled:cursor-default disabled:opacity-60"
+                        className="flex items-center gap-2 rounded-l-xl border-r border-input px-3 py-2.5 text-sm transition-colors hover:bg-muted disabled:cursor-default disabled:opacity-60"
                         disabled={DEMO_MODE}
                       >
                         <span>{selectedCountry.flag}</span>
@@ -311,7 +298,7 @@ export default function LoginPage() {
                       </button>
 
                       {showDropdown && !DEMO_MODE && (
-                        <div className="absolute left-0 top-full mt-2 max-h-64 w-64 overflow-auto rounded-2xl border border-border bg-popover p-1 shadow-xl shadow-black/10 dark:shadow-white/10">
+                        <div className="absolute left-0 top-full mt-2 max-h-64 w-64 overflow-auto rounded-xl border border-border bg-popover p-1 shadow-lg">
                           {COUNTRY_CODES.map((c, i) => (
                             <button
                               key={`${c.country}-${i}`}
@@ -320,7 +307,7 @@ export default function LoginPage() {
                                 setSelectedCountry(c);
                                 setShowDropdown(false);
                               }}
-                              className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm transition-colors hover:bg-muted"
+                              className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm transition-colors hover:bg-muted"
                             >
                               <span>{c.flag}</span>
                               <span className="flex-1">{c.name}</span>
@@ -341,7 +328,7 @@ export default function LoginPage() {
                         }
                         placeholder={DEMO_MODE ? "9876543210" : "98765 43210"}
                         readOnly={DEMO_MODE}
-                        className="min-w-0 flex-1 rounded-r-2xl bg-transparent px-3 py-3 text-sm outline-none placeholder:text-muted-foreground/65"
+                        className="min-w-0 flex-1 rounded-r-xl bg-transparent px-3 py-2.5 text-sm outline-none placeholder:text-muted-foreground/65"
                         onKeyDown={(e) => e.key === "Enter" && handleSendAuth()}
                       />
                     </div>
@@ -351,20 +338,18 @@ export default function LoginPage() {
                     onClick={handleSendAuth}
                     disabled={isLoading || (!DEMO_MODE && !phoneNumber.trim())}
                     size="lg"
-                    className="w-full shadow-sm shadow-primary/20"
+                    className="w-full"
                   >
                     {isLoading ? (
-                      <Loader2
-                        data-icon="inline-start"
-                        className="animate-spin"
-                      />
+                      <Loader2 className="animate-spin" />
                     ) : DEMO_MODE ? (
                       <FlaskConical data-icon="inline-start" />
                     ) : null}
-                    {DEMO_MODE ? "Enter portal" : "Continue"}
-                    {!DEMO_MODE && !isLoading && (
-                      <ArrowRight data-icon="inline-end" />
-                    )}
+                    {isLoading
+                      ? "Sending request..."
+                      : DEMO_MODE
+                        ? "Enter portal"
+                        : "Continue"}
                   </Button>
 
                   <p className="text-center text-xs leading-5 text-muted-foreground">
@@ -380,7 +365,7 @@ export default function LoginPage() {
                           <span className="w-full border-t border-border/60" />
                         </div>
                         <div className="relative flex justify-center text-xs">
-                          <span className="bg-card px-2 text-muted-foreground">
+                          <span className="bg-background px-2 text-muted-foreground">
                             or choose a profile
                           </span>
                         </div>
@@ -432,7 +417,7 @@ export default function LoginPage() {
                   <div className="mx-auto flex size-20 items-center justify-center rounded-[2rem] bg-primary/10 text-primary">
                     <Smartphone className="size-10" />
                   </div>
-                  <div className="rounded-2xl border border-border/80 bg-background/70 p-4 text-left">
+                  <div className="rounded-xl border border-border/80 bg-background/70 p-4 text-left">
                     <p className="mb-3 text-sm font-semibold">
                       Approval checklist
                     </p>
@@ -472,12 +457,12 @@ export default function LoginPage() {
                   </div>
                 </div>
               )}
-            </CardContent>
-          </Card>
+            </div>
 
-          <div className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
-            <Lock className="size-3" />
-            <span>End-to-end encrypted biometric approval</span>
+            <div className="mt-8 flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
+              <Lock className="size-3" />
+              <span>End-to-end encrypted biometric approval</span>
+            </div>
           </div>
         </section>
       </main>
