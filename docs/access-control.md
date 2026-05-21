@@ -86,7 +86,7 @@ Get current user's access status.
 }
 ```
 
-### GET `/api/access/request` (Admin)
+### GET `/api/access/approve` (Admin)
 
 List all access requests.
 
@@ -100,8 +100,9 @@ List all access requests.
     {
       "id": "xxx",
       "useCase": "...",
-      "userId": "yyy",
       "requestedAt": "2024-01-01T00:00:00Z",
+      "approvedAt": "2024-01-02T00:00:00Z",
+      "adminNotes": "Approved for production",
       "user": {
         "id": "yyy",
         "phoneNumber": "+1234567890",
@@ -180,7 +181,7 @@ In demo mode:
 Run the migration:
 
 ```bash
-pnpm db:push
+bun run db:push
 ```
 
 Or run manually:

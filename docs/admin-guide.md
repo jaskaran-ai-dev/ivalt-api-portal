@@ -2,37 +2,66 @@
 
 ## Overview
 
-This guide explains how administrators can approve or reject user access requests to the iVALT Developer Portal.
+This guide explains how administrators can approve or reject user access requests to the iVALT Developer Portal. The admin panel provides a dashboard for monitoring usage and managing users.
+
+## Admin Dashboard
+
+The admin dashboard (`/admin/dashboard`) provides an overview of:
+
+| Metric | Description |
+|--------|-------------|
+| Total Users | Count of all registered users |
+| Total API Keys | Count of all API keys |
+| Active Keys | Keys currently enabled |
+| Recently Used | Keys used in last 24h |
 
 ## How Requests Are Created
 
 1. User completes biometric authentication
 2. System automatically creates `access_request` record with `status: "pending"`
-3. Admin receives notification (email, Slack, etc.)
+3. Admin receives notification (email, Slack, etc.) via `sendAdminNotification()` in `src/app/api/access/request/route.ts`
 
 ## Viewing Pending Requests
-
-### Database Query
-
-```sql
--- View all pending requests with user info
-SELECT 
-    ar.id,
-    ar.use_case,
-    ar.requested_at,
-    u.phone_number,
-    u.name
-FROM access_requests ar
-JOIN users u ON ar.user_id = u.id
-WHERE ar.approved_at IS NULL
-ORDER BY ar.requested_at DESC;
-```
 
 ### API Endpoint
 
 ```bash
-curl http://localhost:3000/api/access/request?status=pending
+# Get all pending requests
+curl http://localhost:3000/api/access/approve?status=pending
+
+# Get all requests (pending, approved, or all)
+curl http://localhost:3000/api/access/approve?status=all
 ```
+
+### Response Structure
+
+```json
+{
+  "requests": [
+    {
+      "id": "request-uuid",
+      "userId": "user-uuid",
+      "useCase": "User's stated use case",
+      "requestedAt": "2025-05-21T10:00:00Z",
+      "approvedAt": null,
+      "adminNotes": null,
+      "user": {
+        "id": "user-uuid",
+        "phoneNumber": "+919876543210",
+        "name": "John Doe"
+      }
+    }
+  ]
+}
+```
+
+## User States
+
+| State | Description | Can Access |
+|-------|-------------|------------|
+| `pending` | Biographic auth complete, access request submitted | Access request form, status page |
+| `approved` | Admin approved access | Dashboard, API keys, docs |
+| `rejected` | Admin denied access | Access request form (new submission) |
 
 ## Approving Requests
 
@@ -50,10 +79,11 @@ curl -X POST http://localhost:3000/api/access/approve \
 
 ### What Happens on Approval
 
-1. User's `status` in `users` table changes to `"approved"`
-2. `approved_at` timestamp is set
-3. User's `last_login_at` is updated
-4. User can now access dashboard
+1. `access_requests.approvedAt` timestamp is set
+2. `access_requests.adminNotes` is updated (if provided)
+3. User's `status` in `users` table changes to `"approved"`
+4. User's `approved_at` timestamp is set
+5. User can now access dashboard and manage API keys
 
 ## Rejecting Requests
 
@@ -109,7 +139,7 @@ curl -X POST http://localhost:3000/api/access/approve \
 
 ```bash
 # Get pending requests
-requests=$(curl -s http://localhost:3000/api/access/request?status=pending | jq -r '.requests[].id')
+requests=$(curl -s http://localhost:3000/api/access/approve?status=pending | jq -r '.requests[].id')
 
 # Approve each
 for id in $requests; do
@@ -159,11 +189,57 @@ async function sendAdminNotification(userId: string, useCase: string) {
 }
 ```
 
+## API Key Usage Tracking
+
+The admin dashboard provides real-time API key usage statistics from AWS API Gateway.
+
+### Usage Metrics
+
+| Metric | Description |
+|--------|-------------|
+| Total API Keys | Count of all keys |
+| Active Keys | Keys with `is_active = true` |
+| Recently Used | Keys used in last 24h |
+| Total Requests | Sum of all request counts |
+| Inactive Keys | Keys not used in 30 days |
+
+### API Endpoint
+
+```bash
+curl http://localhost:3000/api/admin/usage
+```
+
+### Response Structure
+
+```json
+{
+  "usage": [
+    {
+      "id": "key-uuid",
+      "keyName": "Production App",
+      "isActive": true,
+      "usageCount": 15420,
+      "user": {
+        "id": "user-uuid",
+        "name": "John Doe",
+        "phoneNumber": "+919876543210"
+      }
+    }
+  ],
+  "summary": {
+    "totalKeys": 156,
+    "activeKeys": 142,
+    "recentlyUsed": 23,
+    "totalRequests": 185000
+  }
+}
+```
+
 ## Troubleshooting
 
 ### User Can't Access Dashboard After Approval
 
-1. Check user's `status = 'approved'`
+1. Check user's `status = 'approved'` in the `users` table
 2. User may need to logout/login again
 3. Session may need to be refreshed
 

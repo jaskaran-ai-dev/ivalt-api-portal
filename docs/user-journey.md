@@ -4,9 +4,10 @@ This document describes the complete user journey through the iVALT Developer Po
 
 ## Overview
 
-The iVALT Developer Portal implements a two-step authentication process:
+The iVALT Developer Portal implements a three-step authentication process:
 1. **Biometric Authentication** - Verify user identity via iVALT mobile app
 2. **Access Approval** - Admin review of use case before API access is granted
+3. **Dashboard Access** - User can manage API keys and view documentation
 
 ## Flow Diagram
 
@@ -159,9 +160,11 @@ Browser                    Server                    iVALT API
   │───────────────────────────▶                          │
   │                          │  8. Notify Admin         │
   │                          │                          │
-  │  9. Admin calls /api/access/approve                  │
+  │  9. Admin GET /api/access/approve?status=pending   │
   │───────────────────────────▶                          │
-  │                          │  10. Update User Status   │
+  │  10. Admin POST /api/access/approve                   │
+  │───────────────────────────▶                          │
+  │                          │  11. Update User Status   │
   │                          │                          │
 ```
 

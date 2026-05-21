@@ -5,17 +5,17 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Commands
 
 ```bash
-pnpm dev          # Start dev server on http://localhost:3000
-pnpm build        # Production build
-pnpm start        # Serve production build
+bun dev          # Start dev server on http://localhost:3000
+bun run build    # Production build
+bun start        # Serve production build (or: bun run start)
 
-pnpm db:push      # Sync schema to DB (no migration file generated)
-pnpm db:generate  # Generate a migration file from schema changes
-pnpm db:migrate   # Run pending migrations
-pnpm db:studio    # Open Drizzle Studio GUI
+bun run db:push      # Sync schema to DB (no migration file generated)
+bun run db:generate  # Generate a migration file from schema changes
+bun run db:migrate   # Run pending migrations
+bun run db:studio    # Open Drizzle Studio GUI
 ```
 
-No test suite is configured. TypeScript is the primary correctness check — `pnpm build` will catch type errors.
+No test suite is configured. TypeScript is the primary correctness check — `bun run build` will catch type errors.
 
 ## Architecture
 
