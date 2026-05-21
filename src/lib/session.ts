@@ -6,6 +6,7 @@ export interface SessionData {
   userId?: string;
   phoneNumber?: string;
   isLoggedIn?: boolean;
+  accessStatus?: "pending" | "approved" | "rejected";
   save?: () => Promise<void>;
   destroy?: () => void;
 }
