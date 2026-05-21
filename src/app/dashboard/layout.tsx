@@ -10,13 +10,11 @@ export default async function DashboardLayout({
 }) {
   const session = await getSession();
 
-  // In demo mode, session is always valid — skip auth check
-  if (!DEMO_MODE && !session.isLoggedIn) {
+  if (!session.isLoggedIn) {
     redirect("/login");
   }
 
-  // Check if user has approved access (skip in demo mode)
-  if (!DEMO_MODE && session.accessStatus !== "approved") {
+  if (session.accessStatus !== "approved") {
     redirect("/access/status");
   }
 

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { DEMO_MODE } from "@/lib/demo";
 import { getSession } from "@/lib/session";
 import { db } from "@/db";
 import { users, accessRequests } from "@/db/schema";
@@ -12,6 +13,15 @@ export async function GET(req: NextRequest) {
     if (!userId) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
+
+    // ── DEMO MODE ─────────────────────────────────────────────────────────────
+    if (DEMO_MODE) {
+      return NextResponse.json({
+        status: session.accessStatus || "pending",
+        request: null,
+      });
+    }
+    // ──────────────────────────────────────────────────────────────────────────
 
     const user = await db.query.users.findFirst({
       where: eq(users.id, userId),

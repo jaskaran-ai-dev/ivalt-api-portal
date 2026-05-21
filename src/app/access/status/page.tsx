@@ -11,7 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 export default function AccessStatusPage() {
   const router = useRouter();
   const [status, setStatus] = useState<"pending" | "approved" | "rejected" | "loading">("loading");
-  const [request, setStatus] = useState<any>(null);
+  const [accessRequest, setAccessRequest] = useState<any>(null);
 
   useEffect(() => {
     const fetchStatus = async () => {
@@ -25,7 +25,7 @@ export default function AccessStatusPage() {
         }
 
         setStatus(data.status);
-        setStatus(data.request);
+        setAccessRequest(data.request);
       } catch (error) {
         toast.error("Failed to fetch status");
       }

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { DEMO_MODE } from "@/lib/demo";
 import { getSession } from "@/lib/session";
 import { db } from "@/db";
 import { users, accessRequests } from "@/db/schema";
@@ -18,6 +19,12 @@ export async function POST(req: NextRequest) {
     if (!useCase || typeof useCase !== "string") {
       return NextResponse.json({ error: "Use case is required" }, { status: 400 });
     }
+
+    // ── DEMO MODE ─────────────────────────────────────────────────────────────
+    if (DEMO_MODE) {
+      return NextResponse.json({ success: true, message: "Access request submitted (demo)" });
+    }
+    // ──────────────────────────────────────────────────────────────────────────
 
     // Check if user already has a pending request
     const existingRequest = await db.query.accessRequests.findFirst({
@@ -56,6 +63,12 @@ export async function POST(req: NextRequest) {
 
 export async function GET(req: NextRequest) {
   try {
+    // ── DEMO MODE ─────────────────────────────────────────────────────────────
+    if (DEMO_MODE) {
+      return NextResponse.json({ requests: [] });
+    }
+    // ──────────────────────────────────────────────────────────────────────────
+
     const { searchParams } = new URL(req.url);
     const status = searchParams.get("status") || "pending";
 
