@@ -28,7 +28,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={cn("font-sans", dmSans.variable, syne.variable)}>
+    <html lang="en" className={cn("font-sans", dmSans.variable, syne.variable)} suppressHydrationWarning>
       <body>
         {children}
         <Toaster
