@@ -1,10 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
+import { DEMO_MODE, getDemoAccessRequests } from "@/lib/demo";
 import { db } from "@/db";
 import { users, accessRequests } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, and, or, isNull, isNotNull } from "drizzle-orm";
 
 export async function POST(req: NextRequest) {
   try {
+    // ── DEMO MODE ─────────────────────────────────────────────────────────────
+    if (DEMO_MODE) {
+      return NextResponse.json({ success: true, message: "Request processed (demo)" });
+    }
+    // ──────────────────────────────────────────────────────────────────────────
+
     const { requestId, approved, adminNotes } = await req.json();
 
     if (!requestId) {
@@ -13,7 +20,7 @@ export async function POST(req: NextRequest) {
 
     // Get the access request
     const request = await db.query.accessRequests.findFirst({
-      where: (ar) => ar.id === requestId,
+      where: (ar) => eq(ar.id, requestId),
     });
 
     if (!request) {
@@ -54,15 +61,38 @@ export async function POST(req: NextRequest) {
 
 export async function GET(req: NextRequest) {
   try {
+    // ── DEMO MODE ─────────────────────────────────────────────────────────────
+    if (DEMO_MODE) {
+      const allRequests = getDemoAccessRequests();
+      const { searchParams } = new URL(req.url);
+      const status = searchParams.get("status") || "pending";
+      const filtered =
+        status === "all"
+          ? allRequests
+          : status === "pending"
+            ? allRequests.filter((r) => !r.approvedAt)
+            : allRequests.filter((r) => r.approvedAt);
+      return NextResponse.json({ requests: filtered });
+    }
+    // ──────────────────────────────────────────────────────────────────────────
+
     const { searchParams } = new URL(req.url);
     const status = searchParams.get("status") || "pending";
 
     // Get all access requests with user info
-    const requests = await db.query.accessRequests.findMany({
-      where: (ar) => status === "all" || 
-        (status === "pending" && !ar.approvedAt) ||
-        (status === "approved" && ar.approvedAt),
-    });
+    let requests;
+    
+    if (status === "all") {
+      requests = await db.query.accessRequests.findMany({});
+    } else if (status === "pending") {
+      requests = await db.query.accessRequests.findMany({
+        where: isNull(accessRequests.approvedAt),
+      });
+    } else {
+      requests = await db.query.accessRequests.findMany({
+        where: isNotNull(accessRequests.approvedAt),
+      });
+    }
 
     // For each request, get user info (simplified - in production you'd join or batch query)
     const requestsWithUsers = await Promise.all(

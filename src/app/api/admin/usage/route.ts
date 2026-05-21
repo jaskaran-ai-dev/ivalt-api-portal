@@ -3,10 +3,16 @@ import { db } from "@/db";
 import { apiKeys, apiKeyUsage } from "@/db/schema";
 import { fetchApiKeyUsage } from "@/lib/api-gateway-usage";
 import { eq } from "drizzle-orm";
-import { DEMO_MODE } from "@/lib/demo";
+import { DEMO_MODE, getDemoAdminUsage } from "@/lib/demo";
 
 export async function GET(req: NextRequest) {
   try {
+    // ── DEMO MODE ─────────────────────────────────────────────────────────────
+    if (DEMO_MODE) {
+      return NextResponse.json(getDemoAdminUsage());
+    }
+    // ──────────────────────────────────────────────────────────────────────────
+
     const usageData = await fetchApiKeyUsage();
 
     // Get all API keys with user info
@@ -58,10 +64,19 @@ export async function GET(req: NextRequest) {
         recentlyUsed,
         totalRequests,
       },
-      demo: DEMO_MODE,
     });
   } catch (error) {
     console.error("Usage API error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return NextResponse.json({
+      usage: [],
+      summary: {
+        totalKeys: 0,
+        activeKeys: 0,
+        inactiveKeys: 0,
+        recentlyUsed: 0,
+        totalRequests: 0,
+      },
+      error: "Internal server error",
+    }, { status: 500 });
   }
 }

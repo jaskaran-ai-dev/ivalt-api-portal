@@ -93,6 +93,95 @@ export const DEMO_API_KEYS = [
   },
 ];
 
+// ── Admin mock data ───────────────────────────────────────────────────────────
+
+export const DEMO_ACCESS_REQUESTS = [
+  {
+    id: "demo-req-001",
+    userId: DEMO_USERS[1].id,
+    useCase: "Building a mobile authentication SDK for Android and iOS that integrates iVALT biometric verification for enterprise customers.",
+    requestedAt: new Date("2025-04-15T10:30:00Z"),
+    approvedAt: null,
+    adminNotes: null,
+    user: {
+      id: DEMO_USERS[1].id,
+      phoneNumber: DEMO_USERS[1].phoneNumber,
+      name: DEMO_USERS[1].name,
+    },
+  },
+  {
+    id: "demo-req-002",
+    userId: DEMO_USERS[2].id,
+    useCase: "Implementing biometric login for a healthcare platform requiring HIPAA compliance and multi-factor authentication.",
+    requestedAt: new Date("2025-03-20T14:00:00Z"),
+    approvedAt: new Date("2025-03-22T09:00:00Z"),
+    adminNotes: "Approved after identity verification",
+    user: {
+      id: DEMO_USERS[2].id,
+      phoneNumber: DEMO_USERS[2].phoneNumber,
+      name: DEMO_USERS[2].name,
+    },
+  },
+];
+
+export function getDemoAdminUsers() {
+  return DEMO_USERS.map((u) => ({
+    id: u.id,
+    phoneNumber: u.phoneNumber,
+    name: u.name,
+    status: u.status,
+    createdAt: u.createdAt.toISOString(),
+    approvedAt: u.status === "approved" ? u.updatedAt.toISOString() : null,
+    apiKeyCount: u.id === DEMO_USERS[0].id ? DEMO_API_KEYS.length : 0,
+  }));
+}
+
+export function getDemoAdminKeys() {
+  return DEMO_API_KEYS.map((k) => {
+    const user = DEMO_USERS.find((u) => u.id === k.userId);
+    return {
+      id: k.id,
+      keyName: k.keyName,
+      awsKeyId: k.awsKeyId,
+      keyValue: null,
+      isActive: k.isActive,
+      createdAt: k.createdAt.toISOString(),
+      lastUsedAt: k.lastUsedAt?.toISOString() ?? null,
+      usageCount: k.id === "demo-key-001" ? 15420 : k.id === "demo-key-002" ? 8750 : 0,
+      user: user
+        ? {
+            id: user.id,
+            phoneNumber: user.phoneNumber,
+            name: user.name,
+            status: user.status,
+          }
+        : null,
+    };
+  });
+}
+
+export function getDemoAdminUsage() {
+  const keys = getDemoAdminKeys();
+  return {
+    usage: keys,
+    summary: {
+      totalKeys: keys.length,
+      activeKeys: keys.filter((k) => k.isActive).length,
+      inactiveKeys: keys.filter((k) => !k.isActive).length,
+      recentlyUsed: keys.filter((k) => k.lastUsedAt).length,
+      totalRequests: keys.reduce((sum, k) => sum + k.usageCount, 0),
+    },
+  };
+}
+
+export function getDemoAccessRequests() {
+  return DEMO_ACCESS_REQUESTS.map((r) => ({
+    ...r,
+    requestedAt: r.requestedAt.toISOString(),
+    approvedAt: r.approvedAt?.toISOString() ?? null,
+  }));
+}
+
 let _demoKeys = [...DEMO_API_KEYS];
 
 export function getDemoKeys() {
