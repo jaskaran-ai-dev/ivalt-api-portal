@@ -13,12 +13,14 @@ export const DEMO_USER = {
   createdAt: new Date("2025-01-15T10:00:00Z"),
   updatedAt: new Date("2025-04-01T09:00:00Z"),
   lastLoginAt: new Date("2025-05-07T08:30:00Z"),
+  status: "approved",
 };
 
 export const DEMO_SESSION = {
   userId: DEMO_USER.id,
   phoneNumber: DEMO_USER.phoneNumber,
   isLoggedIn: true,
+  accessStatus: "approved",
 };
 
 export const DEMO_API_KEYS = [
