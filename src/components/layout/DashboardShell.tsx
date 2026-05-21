@@ -34,6 +34,7 @@ import {
   SidebarTrigger,
   SidebarRail,
 } from "@/components/ui/sidebar";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 const navItems = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -233,6 +234,7 @@ function SidebarContentLayout({ children, phoneNumber, demoMode }: DashboardShel
           >
             API Ref ↗
           </a>
+          <ThemeToggle />
         </header>
 
         {/* Content */}
