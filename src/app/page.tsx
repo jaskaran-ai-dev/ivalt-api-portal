@@ -4,7 +4,7 @@ import { DEMO_MODE } from "@/lib/demo";
 
 export default async function Home() {
   if (DEMO_MODE) {
-    redirect("/dashboard");
+    redirect("/login");
   }
   const session = await getSession();
   if (session.isLoggedIn) {

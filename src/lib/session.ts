@@ -1,6 +1,6 @@
 import { getIronSession, SessionOptions } from "iron-session";
 import { cookies } from "next/headers";
-import { DEMO_MODE, DEMO_SESSION } from "./demo";
+import { DEMO_MODE, DEMO_SESSION, getDemoUser } from "./demo";
 
 export interface SessionData {
   userId?: string;
@@ -24,7 +24,21 @@ export const sessionOptions: SessionOptions = {
 
 export async function getSession(): Promise<SessionData> {
   if (DEMO_MODE) {
-    // Return a fake session object with no-op save/destroy
+    const cookieStore = await cookies();
+    const demoUserCookie = cookieStore.get("demo_user");
+    if (demoUserCookie?.value) {
+      const user = getDemoUser(demoUserCookie.value);
+      if (user) {
+        return {
+          userId: user.id,
+          phoneNumber: user.phoneNumber,
+          isLoggedIn: true,
+          accessStatus: user.status,
+          save: async () => {},
+          destroy: () => {},
+        };
+      }
+    }
     return {
       ...DEMO_SESSION,
       save: async () => {},

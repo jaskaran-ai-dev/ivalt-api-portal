@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, CheckCircle2, ChevronDown, FlaskConical, Loader2, Lock, ShieldCheck, Smartphone } from "lucide-react";
+import { ArrowRight, CheckCircle2, ChevronDown, FlaskConical, Loader2, Lock, ShieldCheck, Smartphone, XCircle, Clock } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,30 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Label } from "@/components/ui/label";
 
 const DEMO_MODE = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
+
+const DEMO_PROFILES = [
+  {
+    id: "demo-user-approved",
+    phoneNumber: "+919876543210",
+    label: "Jaskaran (Approved)",
+    description: "Access granted — goes straight to dashboard",
+    status: "approved" as const,
+  },
+  {
+    id: "demo-user-pending",
+    phoneNumber: "+919876543211",
+    label: "Rahul (Pending)",
+    description: "Needs to submit use case form for API access",
+    status: "pending" as const,
+  },
+  {
+    id: "demo-user-rejected",
+    phoneNumber: "+919876543212",
+    label: "Vikesh (Rejected)",
+    description: "Access denied — shows rejected status page",
+    status: "rejected" as const,
+  },
+];
 
 const COUNTRY_CODES = [
   { code: "+1", country: "US", flag: "🇺🇸", name: "United States" },
@@ -59,7 +83,6 @@ export default function LoginPage() {
         if (data.status === "authenticated") {
           clearInterval(interval);
           setStep("success");
-          // Check if user needs to submit access request
           const accessStatus = data.accessStatus || "pending";
           const redirectPath = accessStatus === "approved" ? "/dashboard" : "/access/request";
           setTimeout(() => router.push(redirectPath), 1500);
@@ -78,26 +101,33 @@ export default function LoginPage() {
     }, 2000);
   }, [fullNumber, router]);
 
-  const handleDemoLogin = useCallback(async () => {
+  const handleDemoLogin = useCallback(async (phone: string) => {
     setIsLoading(true);
-    const res = await fetch("/api/auth/verify", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ phoneNumber: "+919876543210" }),
-    });
-    const data = await res.json();
-    if (data.status === "authenticated") {
-      setStep("success");
-      setTimeout(() => router.push("/dashboard"), 800);
-    } else {
+    try {
+      const res = await fetch("/api/auth/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phoneNumber: phone }),
+      });
+      const data = await res.json();
+      if (data.status === "authenticated") {
+        setStep("success");
+        const accessStatus = data.accessStatus || "pending";
+        const redirectPath = accessStatus === "approved" ? "/dashboard" : accessStatus === "rejected" ? "/access/status" : "/access/request";
+        setTimeout(() => router.push(redirectPath), 800);
+      } else {
+        setIsLoading(false);
+        router.push("/dashboard");
+      }
+    } catch {
       setIsLoading(false);
-      router.push("/dashboard");
+      toast.error("Demo login failed");
     }
   }, [router]);
 
   const handleSendAuth = useCallback(async () => {
     if (DEMO_MODE) {
-      await handleDemoLogin();
+      await handleDemoLogin(fullNumber);
       return;
     }
 
@@ -191,7 +221,7 @@ export default function LoginPage() {
                 {step === "waiting" ? "Approve on your phone" : step === "success" ? (DEMO_MODE ? "Demo access granted" : "Authenticated") : DEMO_MODE ? "Demo access" : "Sign in"}
               </CardTitle>
               <CardDescription>
-                {step === "waiting" ? `Request sent to ${fullNumber}` : step === "success" ? "Redirecting to your developer portal…" : DEMO_MODE ? "Explore the portal with safe demo data." : "Enter your mobile number to receive an iVALT approval request."}
+                {step === "waiting" ? `Request sent to ${fullNumber}` : step === "success" ? "Redirecting to your developer portal\u2026" : DEMO_MODE ? "Explore the portal with safe demo data." : "Enter your mobile number to receive an iVALT approval request."}
               </CardDescription>
             </CardHeader>
             <CardContent className="p-6">
@@ -200,7 +230,7 @@ export default function LoginPage() {
                   {DEMO_MODE && (
                     <div className="flex items-center gap-3 rounded-2xl border border-primary/10 bg-primary/5 p-3 text-sm text-muted-foreground">
                       <FlaskConical className="size-4 shrink-0 text-primary" />
-                      Demo mode is active — no live biometric request will be sent.
+                      Demo mode is active \u2014 no live biometric request will be sent.
                     </div>
                   )}
 
@@ -261,6 +291,52 @@ export default function LoginPage() {
                   <p className="text-center text-xs leading-5 text-muted-foreground">
                     {DEMO_MODE ? "Demo login bypasses biometric authentication." : "A notification will be sent to your registered iVALT app."}
                   </p>
+
+                  {DEMO_MODE && (
+                    <>
+                      <div className="relative">
+                        <div className="absolute inset-0 flex items-center">
+                          <span className="w-full border-t border-border/60" />
+                        </div>
+                        <div className="relative flex justify-center text-xs">
+                          <span className="bg-card px-2 text-muted-foreground">or choose a profile</span>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col gap-2">
+                        {DEMO_PROFILES.map((profile) => (
+                          <button
+                            key={profile.id}
+                            type="button"
+                            onClick={() => handleDemoLogin(profile.phoneNumber)}
+                            disabled={isLoading}
+                            className="flex w-full items-center gap-3 rounded-xl border border-border/60 bg-background/50 px-3.5 py-2.5 text-left text-sm transition-colors hover:bg-muted/50 active:scale-[0.98] disabled:opacity-60"
+                          >
+                            <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                              {profile.status === "approved" ? (
+                                <CheckCircle2 className="size-4" />
+                              ) : profile.status === "rejected" ? (
+                                <XCircle className="size-4" />
+                              ) : (
+                                <Clock className="size-4" />
+                              )}
+                            </div>
+                            <span className="flex-1 font-medium">{profile.label}</span>
+                            <Badge
+                              variant={
+                                profile.status === "approved" ? "default" as const :
+                                profile.status === "rejected" ? "destructive" as const :
+                                "secondary" as const
+                              }
+                              className="text-[10px] px-1.5 py-0"
+                            >
+                              {profile.status}
+                            </Badge>
+                          </button>
+                        ))}
+                      </div>
+                    </>
+                  )}
                 </div>
               )}
 
@@ -279,7 +355,7 @@ export default function LoginPage() {
                   </div>
                   <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
                     <Loader2 className="size-4 animate-spin" />
-                    Waiting… {Math.ceil((150 - pollCount) * 2)}s remaining
+                    Waiting\u2026 {Math.ceil((150 - pollCount) * 2)}s remaining
                   </div>
                   <Button variant="ghost" size="sm" onClick={() => setStep("phone")}>Use different number</Button>
                 </div>

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { DEMO_MODE, DEMO_SESSION, DEMO_USER } from "@/lib/demo";
+import { DEMO_MODE, getDemoUser } from "@/lib/demo";
 import { getBiometricResult } from "@/lib/ivalt";
 import { getSession } from "@/lib/session";
 import { db } from "@/db";
@@ -16,11 +16,22 @@ export async function POST(req: NextRequest) {
 
     // ── DEMO MODE ─────────────────────────────────────────────────────────────
     if (DEMO_MODE) {
-      // Simulate 2 "pending" polls then immediately succeed
-      const { searchParams } = new URL(req.url);
       await new Promise((r) => setTimeout(r, 400));
-      // Always return authenticated in demo — the client polls and we just say yes
-      return NextResponse.json({ status: "authenticated", demo: true });
+      const demoUser = getDemoUser(phoneNumber);
+      if (!demoUser) {
+        return NextResponse.json({ status: "not_found" }, { status: 404 });
+      }
+      const response = NextResponse.json({
+        status: "authenticated",
+        accessStatus: demoUser.status,
+      });
+      response.cookies.set("demo_user", demoUser.phoneNumber, {
+        path: "/",
+        maxAge: 60 * 60,
+        httpOnly: true,
+        sameSite: "lax",
+      });
+      return response;
     }
     // ──────────────────────────────────────────────────────────────────────────
 
