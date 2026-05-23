@@ -3,7 +3,7 @@ import { DEMO_MODE } from "@/lib/demo";
 import { getSession } from "@/lib/session";
 import { db } from "@/db";
 import { users, accessRequests } from "@/db/schema";
-import { eq, isNull } from "drizzle-orm";
+import { eq, isNull, isNotNull } from "drizzle-orm";
 
 export async function POST(req: NextRequest) {
   try {
@@ -83,7 +83,7 @@ export async function GET(req: NextRequest) {
       });
     } else {
       requests = await db.query.accessRequests.findMany({
-        where: (ar) => ar.approvedAt !== null,
+        where: isNotNull(accessRequests.approvedAt),
       });
     }
 

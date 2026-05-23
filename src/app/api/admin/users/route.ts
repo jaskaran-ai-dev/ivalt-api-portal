@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { DEMO_MODE, getDemoAdminUsers } from "@/lib/demo";
 import { db } from "@/db";
-import { users } from "@/db/schema";
+import { users, apiKeys } from "@/db/schema";
+import { count, eq } from "drizzle-orm";
 
 export async function GET(req: NextRequest) {
   try {
@@ -25,12 +26,10 @@ export async function GET(req: NextRequest) {
     // Count API keys for each user
     const usersWithKeyCounts = await Promise.all(
       allUsers.map(async (user) => {
-        const keyCount = await db.query.apiKeys.count({
-          where: (ak) => ak.userId === user.id,
-        });
+        const keyCount = await db.select({ count: count(apiKeys) }).from(apiKeys).where(eq(apiKeys.userId, user.id));
         return {
           ...user,
-          apiKeyCount: keyCount,
+          apiKeyCount: keyCount[0]?.count || 0,
         };
       })
     );

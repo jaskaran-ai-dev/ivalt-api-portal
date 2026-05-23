@@ -3,6 +3,7 @@ import { DEMO_MODE } from "@/lib/demo";
 import { sendBiometricAuthRequest } from "@/lib/ivalt";
 import { db } from "@/db";
 import { users } from "@/db/schema";
+import { eq } from "drizzle-orm";
 
 export async function POST(req: NextRequest) {
   try {
@@ -39,7 +40,7 @@ export async function POST(req: NextRequest) {
 
     // Check if user exists and is already approved
     const existingUser = await db.query.users.findFirst({
-      where: (u) => u.phoneNumber === cleanPhone,
+      where: eq(users.phoneNumber, cleanPhone),
     });
 
     // If user exists and is approved, no need to create access request again

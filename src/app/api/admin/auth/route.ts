@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
     session.userId = user.id;
     session.phoneNumber = cleanPhone;
     session.isLoggedIn = true;
-    session.accessStatus = user.status || "approved";
+    session.accessStatus = (user.status as "pending" | "approved" | "rejected") || "approved";
     session.role = "admin";
     await session.save!();
 

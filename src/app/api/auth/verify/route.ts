@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
       // If user is not yet approved, create an access request if one doesn't exist
       if (user.status === "pending") {
         const existingRequest = await db.query.accessRequests.findFirst({
-          where: (ar) => ar.userId === user.id,
+          where: eq(accessRequests.userId, user.id),
         });
 
         if (!existingRequest) {
@@ -75,7 +75,7 @@ export async function POST(req: NextRequest) {
       session.userId = user.id;
       session.phoneNumber = cleanPhone;
       session.isLoggedIn = true;
-      session.accessStatus = user.status;
+      session.accessStatus = user.status as "pending" | "approved" | "rejected";
       await session.save!();
 
       return NextResponse.json({ status: "authenticated", accessStatus: user.status });
