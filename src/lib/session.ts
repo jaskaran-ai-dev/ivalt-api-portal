@@ -7,6 +7,7 @@ export interface SessionData {
   phoneNumber?: string;
   isLoggedIn?: boolean;
   accessStatus?: "pending" | "approved" | "rejected";
+  role?: "admin" | "user";
   save?: () => Promise<void>;
   destroy?: () => void;
 }
@@ -41,6 +42,7 @@ export async function getSession(): Promise<SessionData> {
     }
     return {
       ...DEMO_SESSION,
+      accessStatus: "approved" as const,
       save: async () => {},
       destroy: () => {},
     };

@@ -53,7 +53,7 @@ export async function fetchApiKeyUsage(): Promise<ApiKeyUsage[]> {
     };
 
     const keysCommand = new GetUsagePlanKeysCommand(keysParams);
-    const keysResponse = await apiKeyClient.send(keysCommand);
+    const keysResponse = await apiKeyClient.send(keysCommand) as { keys?: { id: string; value: string }[] };
 
     if (!keysResponse.keys || keysResponse.keys.length === 0) {
       return [];
@@ -72,7 +72,7 @@ export async function fetchApiKeyUsage(): Promise<ApiKeyUsage[]> {
       };
 
       const usageCommand = new GetUsageCommand(usageParams);
-      const usageResponse = await apiKeyClient.send(usageCommand);
+      const usageResponse = await apiKeyClient.send(usageCommand) as { usage?: { count?: number }[] };
 
       // Sum up the usage count from all periods
       let totalCount = 0;
