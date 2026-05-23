@@ -1,4 +1,5 @@
 import { pgTable, text, timestamp, varchar, boolean, integer } from "drizzle-orm/pg-core";
+import { relations } from "drizzle-orm/relations";
 
 export const users = pgTable("users", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
@@ -47,6 +48,18 @@ export const apiKeyUsage = pgTable("api_key_usage", {
   lastFetchedAt: timestamp("last_fetched_at").defaultNow().notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
+
+// Relations
+export const apiKeysRelations = relations(apiKeys, ({ one }) => ({
+  user: one(users, {
+    fields: [apiKeys.userId],
+    references: [users.id],
+  }),
+}));
+
+export const usersRelations = relations(users, ({ many }) => ({
+  apiKeys: many(apiKeys),
+}));
 
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
