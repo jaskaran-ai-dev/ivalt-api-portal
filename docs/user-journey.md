@@ -11,77 +11,24 @@ The iVALT Developer Portal implements a three-step authentication process:
 
 ## Flow Diagram
 
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                           USER JOURNEY FLOW                                  │
-└─────────────────────────────────────────────────────────────────────────────┘
+### User Journey Flow
 
-    ┌──────────────┐
-    │   START      │
-    │  (Browser)   │
-    └──────┬───────┘
-           │
-           ▼
-    ┌──────────────┐
-    │ Login Page   │
-    │ Enter Phone  │
-    └──────┬───────┘
-           │
-           ▼
-    ┌──────────────┐     ┌──────────────┐
-    │ Send Auth    │────▶│ iVALT App    │
-    │ Request      │     │ Push Notif   │
-    └──────┬───────┘     └──────────────┘
-           │
-           ▼
-    ┌──────────────┐
-    │ Poll /verify │
-    │ (every 2s)   │
-    └──────┬───────┘
-           │
-           ▼
-    ┌──────────────┐
-    │ Store Session│
-    │ (pending)    │
-    └──────┬───────┘
-           │
-           ▼
-    ┌──────────────┐
-    │ Access Request│
-    │ Form         │
-    └──────┬───────┘
-           │
-           ▼
-    ┌──────────────┐
-    │ Submit Use   │
-    │ Case         │
-    └──────┬───────┘
-           │
-           ▼
-    ┌──────────────┐
-    │ Admin Review │
-    │ (Email/Slack)│
-    └──────┬───────┘
-           │
-           ├──────────────────┐
-           │                  │
-    ┌──────▼──────┐    ┌──────▼──────┐
-    │  APPROVED   │    │ REJECTED    │
-    │ Update User │    │ Update User │
-    │ Status      │    │ Status      │
-    └──────┬──────┘    └──────┬──────┘
-           │                  │
-           ▼                  ▼
-    ┌──────────────┐ ┌──────────────┐
-    │ Access       │ │ Submit New   │
-    │ Granted      │ │ Request      │
-    └──────┬───────┘ └──────────────┘
-           │
-           ▼
-    ┌──────────────┐
-    │ Dashboard    │
-    │ (Full Access)│
-    └──────────────┘
+```mermaid
+flowchart TD
+    A[START] --> B[Login Page - Enter Phone]
+    B --> C[Send Auth Request]
+    C --> D[Poll /verify - every 2s]
+    D --> E[Store Session - pending]
+    E --> F[Access Request Form]
+    F --> G[Submit Use Case]
+    G --> H[Admin Review - Email/Slack]
+    H --> I{Approved?}
+    
+    I -->|Yes| J[Update User Status - approved]
+    J --> K[Access Granted - Dashboard]
+    
+    I -->|No| L[Update User Status - rejected]
+    L --> M[Submit New Request]
 ```
 
 ## Step-by-Step User Journey
@@ -138,34 +85,134 @@ The iVALT Developer Portal implements a three-step authentication process:
 
 ## Technical Flow
 
+### API Interaction Flow
+
+```mermaid
+sequenceDiagram
+    participant Browser
+    participant Server
+    participant iVALT_API as iVALT API
+
+    Browser->>Server: 1. POST /api/auth/request
+    Server->>iVALT_API: 2. BiometricAuthRequest
+    iVALT_API-->>Server: 3. BiometricAuthResponse
+    Server-->>Browser: 4. 200 OK
+
+    loop Polling (every 2s)
+        Browser->>Server: 5. GET /api/auth/verify
+        Server->>iVALT_API: 6. BiometricResult
+        iVALT_API-->>Server: 7. Result data (+ accessStatus)
+        Server-->>Browser: 8. 200 + accessStatus
+    end
+
+    Browser->>Server: 9. POST /api/access/request
+    Server-->>Browser: 10. Notify Admin
 ```
-Browser                    Server                    iVALT API
-  │                          │                          │
-  │  1. POST /api/auth/request  │                          │
-  │───────────────────────────▶│                          │
-  │                          │  2. BiometricAuthRequest  │
-  │                          │─────────────────────────▶│
-  │                          │◀──────────────────────────│
-  │  3. 200 OK               │                          │
-  │◀───────────────────────────│                          │
-  │                          │                          │
-  │  4. GET /api/auth/verify (poll)                      │
-  │───────────────────────────▶                          │
-  │                          │  5. BiometricResult      │
-  │                          │◀──────────────────────────│
-  │  6. 200 + accessStatus    │                          │
-  │◀───────────────────────────│                          │
-  │                          │                          │
-  │  7. POST /api/access/request                         │
-  │───────────────────────────▶                          │
-  │                          │  8. Notify Admin         │
-  │                          │                          │
-  │  9. Admin GET /api/access/approve?status=pending   │
-  │───────────────────────────▶                          │
-  │  10. Admin POST /api/access/approve                   │
-  │───────────────────────────▶                          │
-  │                          │  11. Update User Status   │
-  │                          │                          │
+
+## User Journey Sequence Diagram
+
+```mermaid
+sequenceDiagram
+    participant User as End User
+    participant Browser as Web Browser
+    participant Server as Portal Server
+    participant iVALT_API as iVALT API
+    participant Admin as Admin (Email/UI)
+    participant Database as Database
+
+    Note over User,Database: Phase 1: Authentication
+    User->>Browser: 1. Open portal and enter phone number
+    Browser->>Server: 2. POST /api/auth/request
+    Server->>iVALT_API: 3. Send biometric auth request
+    iVALT_API-->>Server: 4. Request received (status: pending)
+    Server-->>Browser: 5. Redirect to verification page
+    loop Polling every 2s
+        Browser->>Server: 6. GET /api/auth/verify
+        Server->>iVALT_API: 7. Check biometric status
+        iVALT_API-->>Server: 8. Status: completed
+        Server-->>Browser: 9. Update UI (authenticated)
+    end
+
+    Note over User,Database: Phase 2: Access Request
+    Browser-->>User: Show access request form
+    User->>Browser: 10. Fill and submit use case
+    Browser->>Server: 11. POST /api/access/request
+    Server->>Database: 12. Create access request record
+    Database-->>Server: 13. Record created
+    Server->>Admin: 14. Send notification (email/Slack)
+    Server-->>Browser: 15. Show confirmation message
+
+    Note over User,Database: Phase 3: Admin Review
+    Admin->>Server: 16. Check pending requests
+    Server->>Database: 17. Query pending requests
+    Database-->>Server: 18. Return request list
+    Server-->>Admin: 19. Display requests (email/Slack)
+
+    Admin->>Server: 20. Review use case
+    Server->>Database: 21. Fetch user/request details
+    Database-->>Server: 22. Return data
+    Server-->>Admin: 23. Show user info and use case
+
+    alt Approved
+        Admin->>Server: 24. POST /api/access/approve
+        Server->>Database: 25. Update status = approved
+        Database-->>Server: 26. Confirmation
+        Server->>Database: 27. Generate API keys
+        Database-->>Server: 28. Keys created
+        Server-->>User: 29. Email: Access approved
+    else Rejected
+        Admin->>Server: 30. POST /api/access/reject
+        Server->>Database: 31. Update status = rejected
+        Database-->>Server: 32. Confirmation
+        Server-->>User: 33. Email: Access rejected + feedback
+    end
+
+    Note over User,Database: Phase 4: Dashboard Access
+    alt User Status = approved
+        User->>Browser: 34. Visit portal again
+        Browser->>Server: 35. GET /api/auth/session
+        Server->>Database: 36. Get user status
+        Database-->>Server: 37. Return user data
+        Server-->>Browser: 38. Return approved status
+        Browser-->>User: 39. Show dashboard with API keys
+    end
+```
+
+## Admin Review Sequence Diagram
+
+```mermaid
+sequenceDiagram
+    participant Admin as Admin (Email/UI)
+    participant Server
+    participant Database as Database/API
+
+    Admin->>Server: 1. Check pending requests
+    Server->>Database: 2. Query pending access requests
+    Database-->>Server: 3. Return request list
+    Server-->>Admin: 4. Display requests (Email/Slack)
+
+    Admin->>Server: 5. Review use case details
+    Server->>Database: 6. Fetch user and request details
+    Database-->>Server: 7. Return data
+    Server-->>Admin: 8. Show user info and use case
+
+    alt Approved
+        Admin->>Server: 9. POST /api/access/approve
+        Server->>Database: 10. Update user status = approved
+        Database-->>Server: 11. Confirmation
+        Server-->>Admin: 12. Approval confirmed
+        Server->>Database: 13. Generate API keys
+        Database-->>Server: 14. Keys created
+        Server-->>User: 15. Notify user via email
+    end
+
+    alt Rejected
+        Admin->>Server: 16. POST /api/access/reject
+        Server->>Database: 17. Update user status = rejected
+        Database-->>Server: 18. Confirmation
+        Server-->>Admin: 19. Rejection confirmed
+        Server-->>User: 20. Notify user with feedback
+    end
 ```
 
 ## Error Handling
